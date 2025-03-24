@@ -23,8 +23,11 @@ const DocComponents = lazy(() => import('../pages/DocComponents'))
 const UserDetails = lazy(() => import('../pages/protected/userDetails'))
 const AddOnsInput = lazy(() => import('../pages/protected/AddOnsInput'))
 const ExamsDetails = lazy(() => import('../pages/protected/examDetails'))
-// const AssessmentManagement = lazy(() => import('../pages/protected/LearningManagement'))
+const AssessmentManagement = lazy(() => import('../pages/protected/AssessmentManagement'))
+const AddQuiz = lazy(() => import('../pages/protected/AddQuiz'))
+const AllQuizzes = lazy(() => import('../pages/protected/AllQuizzes'))
 const LearningManagement = lazy(() => import('../pages/protected/Instructor/index'))
+
 
 
 
@@ -58,13 +61,21 @@ const routes = [
     path: '/calendar',
     component: Calendar,
   },
-  // {
-  //   path: '/assessment-management',
-  //   component: AssessmentManagement,
-  // },
+  {
+    path: '/assessment-management',
+    component: AssessmentManagement,
+  },
   {
     path: '/learning-management',
     component: LearningManagement,
+  },
+  {
+    path: '/add-quiz',
+    component: AddQuiz,
+  },
+  {
+    path: '/all-quiz',
+    component: AllQuizzes,
   },
   {
     path: '/all-users',
