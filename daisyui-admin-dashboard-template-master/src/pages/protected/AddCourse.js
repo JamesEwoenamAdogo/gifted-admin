@@ -57,7 +57,7 @@ export default function AdminDashboard() {
           </div>
         ))}
 
-        <button type="button" className="bg-blue-500 text-white px-4 py-2 rounded flex items-center gap-2 mb-4" onClick={addModule}>
+        <button type="button"  className="bg-blue-500 text-white px-4 py-2 rounded flex items-center gap-2 mb-4" onClick={addModule}>
           <FaPlus /> Add Module
         </button>
 
