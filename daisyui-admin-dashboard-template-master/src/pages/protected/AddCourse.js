@@ -41,7 +41,7 @@ export default function AdminDashboard() {
       
       <form onSubmit={handleSubmit} className=" p-6 rounded-lg shadow-md">
         {modules.map((module, index) => (
-          <div key={index} className="bg-gray-100 p-4 rounded-md shadow-md mb-4">
+          <div key={index} className="p-4 rounded-md shadow-md mb-4">
             <label className="block mb-2 font-semibold">Module Title</label>
             <input type="text" name="title" value={module.title} onChange={(e) => handleModuleChange(index, e)} className="w-full p-2 border rounded mb-4" required />
 
