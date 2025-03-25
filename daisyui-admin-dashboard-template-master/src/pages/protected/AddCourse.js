@@ -39,7 +39,7 @@ export default function AdminDashboard() {
     <div className="max-w-5xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
       
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+      <form onSubmit={handleSubmit} className=" p-6 rounded-lg shadow-md">
         {modules.map((module, index) => (
           <div key={index} className="bg-gray-100 p-4 rounded-md shadow-md mb-4">
             <label className="block mb-2 font-semibold">Module Title</label>
