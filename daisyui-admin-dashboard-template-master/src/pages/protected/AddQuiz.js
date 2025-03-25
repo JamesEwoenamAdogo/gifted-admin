@@ -6,18 +6,29 @@ export default function CreateQuiz() {
   const [description,setDescription] = useState("")
   const [time, setTime]= useState(0)
   const [numberOfQuestions, setNumberOfQuestions]= useState("")
-  const [image, setImage]= useState()
+  const [image, setImage]= useState({})
   
-  const formData = new FormData()
-  formData.append("title",title)
-  formData.append("description",description)
-  formData.append("time",time)
-  formData.append("numberOfQuestions",numberOfQuestions)
-  formData.append("questions",questions)
-  formData.append("image",image)
+  // const formData = new FormData()
+  // formData.append("title",title)
+  // formData.append("description",description)
+  // formData.append("time",time)
+  // formData.append("numberOfQuestions",numberOfQuestions)
+  // formData.append("questions",questions)
+  // formData.append("image",image)
 
   const handleSubmit = (e)=>{
     e.preventDefault()
+    const formData = new FormData()
+    formData.append("title",title)
+    formData.append("description",description)
+    formData.append("time",time)
+    formData.append("numberOfQuestions",numberOfQuestions)
+    formData.append("questions",JSON.stringify(questions))
+    formData.append("image",image)
+
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
 
 
   }
@@ -47,7 +58,7 @@ export default function CreateQuiz() {
   };
 
   useEffect(()=>{
-    console.log(title,description,time,numberOfQuestions,questions,formData) 
+    console.log(title,description,time,numberOfQuestions,questions) 
    },[title,description,time,numberOfQuestions])
 
   return (
