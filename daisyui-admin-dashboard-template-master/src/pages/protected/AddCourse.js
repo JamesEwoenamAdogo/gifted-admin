@@ -33,6 +33,8 @@ export default function AdminDashboard() {
     e.preventDefault();
     setCourses([...courses, { id: Date.now(), modules }]);
     setModules([{ title: "", videos: [], files: [] }]);
+    console.log(courses)
+    console.log(modules)
   };
 
   return (
