@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios"
 
 export default function CreateQuiz() {
   const [questions, setQuestions] = useState([]);
@@ -16,7 +17,7 @@ export default function CreateQuiz() {
   // formData.append("questions",questions)
   // formData.append("image",image)
 
-  const handleSubmit = (e)=>{
+  const handleSubmit =async(e)=>{
     e.preventDefault()
     const formData = new FormData()
     formData.append("title",title)
@@ -29,6 +30,8 @@ export default function CreateQuiz() {
     for (let pair of formData.entries()) {
       console.log(pair[0], pair[1]);
     }
+    const response = await axios.post("/add-exam",formData)
+    console.log(response)
 
 
   }

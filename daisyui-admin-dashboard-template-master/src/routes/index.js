@@ -25,8 +25,9 @@ const AddOnsInput = lazy(() => import('../pages/protected/AddOnsInput'))
 const ExamsDetails = lazy(() => import('../pages/protected/examDetails'))
 const AssessmentManagement = lazy(() => import('../pages/protected/AssessmentManagement'))
 const AddQuiz = lazy(() => import('../pages/protected/AddQuiz'))
+const AddCourse = lazy(() => import('../pages/protected/AddCourse'))
 const AllQuizzes = lazy(() => import('../pages/protected/AllQuizzes'))
-const LearningManagement = lazy(() => import('../pages/protected/Instructor/index'))
+const LearningManagement = lazy(() => import('../pages/protected/LearningManagement'))
 
 
 
@@ -71,6 +72,10 @@ const routes = [
   },
   {
     path: '/add-quiz',
+    component: AddQuiz,
+  },
+  {
+    path: '/all-quiz',
     component: AddQuiz,
   },
   {
