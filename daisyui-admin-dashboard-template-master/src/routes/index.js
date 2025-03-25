@@ -75,8 +75,8 @@ const routes = [
     component: AddQuiz,
   },
   {
-    path: '/all-quiz',
-    component: AddQuiz,
+    path: '/add-course',
+    component: AddCourse,
   },
   {
     path: '/all-quiz',

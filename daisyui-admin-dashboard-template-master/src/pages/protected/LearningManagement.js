@@ -9,7 +9,7 @@ export default function QuizOptions() {
           <PlusCircle size={48} className="text-blue-500 mb-4" />
           <h2 className="text-xl font-semibold mb-2">Add New Course</h2>
           <p className="text-gray-600 mb-4">Create a new Courses with custom questions.</p>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg" onClick={()=>{window.location.href="/app/add-quiz"}}>Add Quiz</button>
+          <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg" onClick={()=>{window.location.href="/app/add-course"}}>Add Quiz</button>
         </div>
 
         {/* View All Quizzes Card */}
