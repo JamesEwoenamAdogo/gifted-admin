@@ -8,7 +8,7 @@ export default function QuizOptions() {
         <div className="p-6  shadow-lg rounded-2xl flex flex-col items-center text-center">
           <PlusCircle size={48} className="text-blue-500 mb-4" />
           <h2 className="text-xl font-semibold mb-2">Add New Course</h2>
-          <p className="text-gray-600 mb-4">Create a new Courses with custom questions.</p>
+          <p className="text-gray-600 mb-4">Create a new Courses.</p>
           <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg" onClick={()=>{window.location.href="/app/add-course"}}>Add Quiz</button>
         </div>
 
