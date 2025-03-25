@@ -6,6 +6,21 @@ export default function CreateQuiz() {
   const [description,setDescription] = useState("")
   const [time, setTime]= useState(0)
   const [numberOfQuestions, setNumberOfQuestions]= useState("")
+  const [image, setImage]= useState()
+  
+  const formData = new FormData()
+  formData.append("title",title)
+  formData.append("description",description)
+  formData.append("time",time)
+  formData.append("numberOfQuestions",numberOfQuestions)
+  formData.append("questions",questions)
+  formData.append("image",image)
+
+  const handleSubmit = (e)=>{
+    e.preventDefault()
+
+
+  }
 
   
 
@@ -32,7 +47,7 @@ export default function CreateQuiz() {
   };
 
   useEffect(()=>{
-    console.log(title,description,time,numberOfQuestions,questions) 
+    console.log(title,description,time,numberOfQuestions,questions,formData) 
    },[title,description,time,numberOfQuestions])
 
   return (
@@ -46,7 +61,7 @@ export default function CreateQuiz() {
       <textarea className="w-full p-2 border rounded mb-4" onChange={(e)=>{setDescription(e.target.value)}}></textarea>
       
       <label className="block mb-2">Image</label>
-      <input type="file" className="w-full p-2 border rounded mb-4" />
+      <input type="file" className="w-full p-2 border rounded mb-4" onChange={(e)=>{setImage(e.target.files[0])}} />
 
        
       <label className="block mb-2">Time Limit (minutes)</label>
@@ -89,7 +104,7 @@ export default function CreateQuiz() {
         </div>
       ))}
        {questions.length > 0 && (
-        <button className="bg-green-500 text-white px-4 py-2 rounded mt-4 w-full">Submit Quiz</button>
+        <button className="bg-green-500 text-white px-4 py-2 rounded mt-4 w-full" onClick={handleSubmit}>Submit Quiz</button>
       )}
     </div>
   );
