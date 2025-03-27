@@ -7,7 +7,7 @@ export default function ItemList() {
     const fetchExams = async()=>{
       const response = await axios.get("/all-exams")
       if(response.data.success){
-        setItems(()=>{return response.data.allCompetitions})
+        setItems(()=>{return [...response.data.allCompetitions]})
       }
       
     }
