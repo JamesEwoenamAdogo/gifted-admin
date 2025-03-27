@@ -1,14 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useRef } from "react";
 import axios from "axios"
 
 export default function ItemList() {
+  // let Quizitems =[]
+  // const ref= useRef(Quizitems)
+
   const [items, setItems] = useState([]);
   useEffect(()=>{
     const fetchExams = async()=>{
       const response = await axios.get("/all-exams")
-      if(response.data.success){
-        setItems(()=>{return [...response.data.allCompetitions]})
-      }
+      console.log(response)
+    
+        setItems(()=>{return [...response.data.allExaminations]})
+    
       console.log(items)
       
     }
