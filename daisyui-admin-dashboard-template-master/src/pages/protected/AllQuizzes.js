@@ -9,6 +9,7 @@ export default function ItemList() {
       if(response.data.success){
         setItems(()=>{return [...response.data.allCompetitions]})
       }
+      console.log(items)
       
     }
     fetchExams()
