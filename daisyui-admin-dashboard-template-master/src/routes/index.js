@@ -79,7 +79,7 @@ const routes = [
     component: AddCourse,
   },
   {
-    path: '/all-quiz',
+    path: '/all-quizzes',
     component: AllQuizzes,
   },
   {
