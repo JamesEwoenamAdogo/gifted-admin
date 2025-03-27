@@ -16,16 +16,24 @@ export default function CreateQuiz() {
     formData.append("description", description);
     formData.append("time", time);
     formData.append("numberOfQuestions", numberOfQuestions);
-    formData.append("questions", JSON.stringify(questions));
     formData.append("image", image);
+    formData.append("questions", JSON.stringify(questions));
 
-    for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
+    questions.forEach((q, index) => {
+      if (q.image) {
+        formData.append("questionImages", q.image);
+      }
+    });
+
+    try {
+      const response = await axios.post("/add-exam", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
     }
-    const response = await axios.post("/add-exam", formData);
-    console.log(response);
   };
-
   const addQuestion = () => {
     setQuestions([...questions, { question: "", answers: ["", "", "", ""], correctAnswer: null, image: null, explanation: "" }]);
   };
