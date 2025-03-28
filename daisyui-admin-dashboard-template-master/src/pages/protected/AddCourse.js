@@ -22,7 +22,7 @@ export default function AdminDashboard() {
     files.forEach((file) => formData.append("files", file));
 
     try {
-      const response = await axios.post("/course", formData, {
+      const response = await axios.post("/upload/file", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
