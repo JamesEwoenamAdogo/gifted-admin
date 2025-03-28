@@ -19,10 +19,11 @@ export default function AdminDashboard() {
     files.forEach((file) => formData.append(type, file));
 
     try {
-      const response = await fetch(`http://localhost:5000/upload/${type}`, {
+      const response = await fetch(`/upload/${type}`, {
         method: "POST",
         body: formData,
       });
+      console.log(formData)
 
       const data = await response.json();
       console.log("Upload Response:", data);
@@ -32,6 +33,7 @@ export default function AdminDashboard() {
       const updatedModules = [...modules];
       updatedModules[index][type] = [...updatedModules[index][type], ...uploadedFiles];
       setModules(updatedModules);
+
     } catch (error) {
       console.error("Upload error:", error);
     }
