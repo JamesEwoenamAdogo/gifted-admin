@@ -1,62 +1,44 @@
 import { useState } from "react";
-import { FaPlus, FaTrash } from "react-icons/fa";
+import axios from "axios";
 
 export default function AdminDashboard() {
   const [courses, setCourses] = useState([]);
   const [courseTitle, setCourseTitle] = useState("");
-  const [modules, setModules] = useState([{ title: "", videos: [], files: [] }]);
+  const [grade, setGrade] = useState(""); // New state for grade
+  const [files, setFiles] = useState([]); // New state for uploaded files
 
-  const handleModuleChange = (index, e) => {
-    const { name, value } = e.target;
-    const updatedModules = [...modules];
-    updatedModules[index][name] = value;
-    setModules(updatedModules);
+  const handleFileUpload = async (e) => {
+    e.preventDefault();
+    const uploadedFiles = Array.from(e.target.files);
+    setFiles(uploadedFiles);
   };
 
-  const handleFileUpload = async (index, e, type) => {
-    const files = Array.from(e.target.files);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
     const formData = new FormData();
-    files.forEach((file) => formData.append(type, file));
+    formData.append("title", courseTitle);
+    formData.append("grade", grade);
+    files.forEach((file) => formData.append("files", file));
 
     try {
-      const response = await fetch(`/upload/${type}`, {
-        method: "POST",
-        body: formData,
+      const response = await axios.post("/course", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      console.log(formData)
 
-      const data = await response.json();
-      console.log("Upload Response:", data);
-
-      const uploadedFiles = data.files.map((file) => file.url);
-
-      const updatedModules = [...modules];
-      updatedModules[index][type] = [...updatedModules[index][type], ...uploadedFiles];
-      setModules(updatedModules);
+      console.log("Course Submitted:", response.data);
+      setCourses([...courses, { id: Date.now(), title: courseTitle, grade }]);
+      setCourseTitle("");
+      setGrade("");
+      setFiles([]);
 
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error("Submission error:", error);
     }
   };
 
-  const addModule = () => {
-    setModules([...modules, { title: "", videos: [], files: [] }]);
-  };
-
-  const removeModule = (index) => {
-    setModules(modules.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setCourses([...courses, { id: Date.now(), title: courseTitle, modules }]);
-    setCourseTitle("");
-    setModules([{ title: "", videos: [], files: [] }]);
-    console.log("Submitted Course:", { title: courseTitle, modules });
-  };
-
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
 
       <form onSubmit={handleSubmit} className="p-6 rounded-lg shadow-md">
@@ -69,55 +51,22 @@ export default function AdminDashboard() {
           required 
         />
 
-        {modules.map((module, index) => (
-          <div key={index} className="p-4 rounded-md shadow-md mb-4">
-            <label className="block mb-2 font-semibold">Module Title</label>
-            <input 
-              type="text" 
-              name="title" 
-              value={module.title} 
-              onChange={(e) => handleModuleChange(index, e)} 
-              className="w-full p-2 border rounded mb-4" 
-              required 
-            />
+        <label className="block mb-2 font-semibold">Grade</label>
+        <input 
+          type="number" 
+          value={grade} 
+          onChange={(e) => setGrade(e.target.value)} 
+          className="w-full p-2 border rounded mb-4" 
+          required 
+        />
 
-            <label className="block mb-2 font-semibold">Upload Videos</label>
-            <input 
-              type="file" 
-              multiple 
-              name="videos" 
-              onChange={(e) => handleFileUpload(index, e, "video")} 
-              className="w-full p-2 border rounded mb-4" 
-              required 
-            />
-
-            <label className="block mb-2 font-semibold">Upload Files</label>
-            <input 
-              type="file" 
-              multiple 
-              name="files" 
-              onChange={(e) => handleFileUpload(index, e, "file")} 
-              className="w-full p-2 border rounded mb-4" 
-              required 
-            />
-
-            <button 
-              type="button" 
-              className="bg-red-500 text-white px-4 py-2 rounded flex items-center" 
-              onClick={() => removeModule(index)}
-            >
-              <FaTrash className="mr-1" /> Remove Module
-            </button>
-          </div>
-        ))}
-
-        <button 
-          type="button" 
-          className="bg-blue-500 text-white px-4 py-2 rounded flex items-center gap-2 mb-4" 
-          onClick={addModule}
-        >
-          <FaPlus /> Add Module
-        </button>
+        <label className="block mb-2 font-semibold">Upload Files</label>
+        <input 
+          type="file" 
+          multiple 
+          onChange={handleFileUpload} 
+          className="w-full p-2 border rounded mb-4" 
+        />
 
         <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded w-full">
           Submit Course
