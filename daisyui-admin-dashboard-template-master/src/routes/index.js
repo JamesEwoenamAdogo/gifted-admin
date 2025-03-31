@@ -27,6 +27,7 @@ const AssessmentManagement = lazy(() => import('../pages/protected/AssessmentMan
 const AddQuiz = lazy(() => import('../pages/protected/AddQuiz'))
 const AddCourse = lazy(() => import('../pages/protected/AddCourse'))
 const AllQuizzes = lazy(() => import('../pages/protected/AllQuizzes'))
+const AllCourses = lazy(() => import('../pages/protected/AllCourses'))
 const LearningManagement = lazy(() => import('../pages/protected/LearningManagement'))
 
 
@@ -81,6 +82,10 @@ const routes = [
   {
     path: '/quizzes',
     component: AllQuizzes,
+  },
+  {
+    path: '/courses',
+    component: AllCourses,
   },
   {
     path: '/all-users',
