@@ -4,13 +4,17 @@ import axios from "axios";
 export default function AdminDashboard() {
   const [courses, setCourses] = useState([]);
   const [courseTitle, setCourseTitle] = useState("");
-  const [grade, setGrade] = useState(""); // New state for grade
-  const [files, setFiles] = useState([]); // New state for uploaded files
+  const [grade, setGrade] = useState("");
+  const [files, setFiles] = useState([]);
+  const [thumbnail, setThumbnail] = useState(null); // New state for thumbnail
 
-  const handleFileUpload = async (e) => {
-    e.preventDefault();
+  const handleFileUpload = (e) => {
     const uploadedFiles = Array.from(e.target.files);
     setFiles(uploadedFiles);
+  };
+
+  const handleThumbnailUpload = (e) => {
+    setThumbnail(e.target.files[0]);
   };
 
   const handleSubmit = async (e) => {
@@ -20,6 +24,9 @@ export default function AdminDashboard() {
     formData.append("title", courseTitle);
     formData.append("grade", grade);
     files.forEach((file) => formData.append("files", file));
+    if (thumbnail) {
+      formData.append("thumbnail", thumbnail);
+    }
 
     try {
       const response = await axios.post("/upload/file", formData, {
@@ -31,7 +38,7 @@ export default function AdminDashboard() {
       setCourseTitle("");
       setGrade("");
       setFiles([]);
-
+      setThumbnail(null);
     } catch (error) {
       console.error("Submission error:", error);
     }
@@ -65,6 +72,13 @@ export default function AdminDashboard() {
           type="file" 
           multiple 
           onChange={handleFileUpload} 
+          className="w-full p-2 border rounded mb-4" 
+        />
+
+        <label className="block mb-2 font-semibold">Upload Course Thumbnail</label>
+        <input 
+          type="file" 
+          onChange={handleThumbnailUpload} 
           className="w-full p-2 border rounded mb-4" 
         />
 
