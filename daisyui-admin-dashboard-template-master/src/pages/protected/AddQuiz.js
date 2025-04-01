@@ -101,9 +101,7 @@ export default function CreateQuiz() {
       <label className="block mb-2">Grade</label>
       <input type="text" className="w-full p-2 border rounded mb-4" onChange={(e) => setGrade(e.target.value)} />
 
-      <button className="bg-blue-500 text-white px-4 py-2 rounded mb-4" onClick={addQuestion}>
-        Add New Question
-      </button>
+    
 
       {questions.map((q, qIndex) => (
         <div key={qIndex} className="border p-4 rounded mb-4">
@@ -124,6 +122,9 @@ export default function CreateQuiz() {
           <textarea className="w-full p-2 border rounded mb-4" value={q.explanation} onChange={(e) => updateExplanation(qIndex, e.target.value)}></textarea>
         </div>
       ))}
+      <button className="bg-blue-500 text-white px-4 py-2 rounded mb-4" onClick={addQuestion}>
+        Add New Question
+      </button>
 
       {questions.length > 0 && (
         <button className="bg-green-500 text-white px-4 py-2 rounded mt-4 w-full" onClick={handleSubmit}>
