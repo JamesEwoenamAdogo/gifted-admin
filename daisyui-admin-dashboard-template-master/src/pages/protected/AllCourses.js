@@ -42,7 +42,7 @@ export default function ItemList() {
                 className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                 onClick={() => handleViewDetails(item)}
               >
-                Show all Questions
+                Show Details
               </button>
               <button
                 className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
