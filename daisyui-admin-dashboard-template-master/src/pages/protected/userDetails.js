@@ -75,6 +75,9 @@ function UserDetails() {
       </div>
       <div className="mt-6 p-4  rounded-xl">
         <h2 className="text-xl font-semibold mb-2 text-gray-700">Paid</h2>
+            <span className="text-gray-700 font-medium">Course Title</span>
+            <span className="text-blue-600 font-semibold">Cost</span>
+            <span className="text-blue-600 font-semibold">Grade</span>
         {userDetails.Paid.map((item,index) => (
           <div key={index} className="flex justify-between p-3 rounded-lg shadow-sm mb-2">
             <span className="text-gray-700 font-medium">{item.name}</span>
