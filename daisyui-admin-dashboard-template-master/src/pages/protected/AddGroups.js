@@ -21,7 +21,7 @@ export default function AdminCreateGroup() {
         headers: {
           "Content-Type": "multipart/form-data",
           token
-          // include auth header if needed
+        
         },
       });
       setMessage("Group created successfully!");
