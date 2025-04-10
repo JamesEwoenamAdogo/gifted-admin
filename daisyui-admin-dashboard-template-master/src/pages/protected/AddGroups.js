@@ -9,6 +9,7 @@ export default function AdminCreateGroup() {
   const [image, setImage] = useState(null);
   const [featured, setFeatured] = useState(false); // New state
   const [message, setMessage] = useState("");
+  const [trending, setTrending]= useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,6 +19,7 @@ export default function AdminCreateGroup() {
     formData.append("category", category);
     formData.append("isOpen", isOpen);
     formData.append("featured", featured);
+    formData.append("trending",trending)
     if (image) formData.append("image", image);
 
     const token = localStorage.getItem("token");
@@ -112,6 +114,15 @@ export default function AdminCreateGroup() {
             className="mr-2"
           />
           Featured
+        </label>
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            checked={trending}
+            onChange={() => setTrending(!trending)}
+            className="mr-2"
+          />
+          Trending
         </label>
 
         <button
