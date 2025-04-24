@@ -21,10 +21,14 @@ export default function ItemList() {
 
   const handleUpdate = (id) => {
     alert(`Update item with ID: ${id}`);
+    // localStorage.setItem("id",id)
   };
 
   const handleViewDetails = (item) => {
-    alert(`Details:\nName: ${item.name}\nDescription: ${item.description}`);
+    // alert(`Details:\nName: ${item.name}\nDescription: ${item.description}`);
+    localStorage.setItem("id",item._id)
+
+    window.location.href="/app/course-details"
   };
 
   return (
@@ -46,7 +50,7 @@ export default function ItemList() {
               </button>
               <button
                 className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                onClick={() => handleUpdate(item.id)}
+                onClick={() => handleUpdate(item)}
               >
                 Update
               </button>

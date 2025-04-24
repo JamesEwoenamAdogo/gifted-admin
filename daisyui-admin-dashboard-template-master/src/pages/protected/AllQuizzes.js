@@ -1,10 +1,11 @@
 import { useEffect, useState,useRef } from "react";
 import axios from "axios"
+// import { useNavigate } from "react-router-dom";
 
 export default function ItemList() {
   // let Quizitems =[]
   // const ref= useRef(Quizitems)
-
+  // const navigate = useNavigate()
   const [items, setItems] = useState([]);
   useEffect(()=>{
     const fetchExams = async()=>{
@@ -20,11 +21,16 @@ export default function ItemList() {
   },[])
 
   const handleUpdate = (id) => {
-    alert(`Update item with ID: ${id}`);
+    // alert(`Update item with ID: ${id}`);
+    // localStorage.setItem("id",id)
+    // window.location.href="/app/quiz-details"
   };
 
   const handleViewDetails = (item) => {
-    alert(`Details:\nName: ${item.name}\nDescription: ${item.description}`);
+    // alert(`Details:\nName: ${item.name}\nDescription: ${item.description}`);
+    localStorage.setItem("id",item._id)
+    window.location.href="/app/quiz-details"
+
   };
 
   return (
@@ -46,7 +52,7 @@ export default function ItemList() {
               </button>
               <button
                 className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                onClick={() => handleUpdate(item.id)}
+                onClick={() => handleUpdate(item._id)}
               >
                 Update
               </button>

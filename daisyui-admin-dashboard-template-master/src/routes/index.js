@@ -31,6 +31,9 @@ const AllCourses = lazy(() => import('../pages/protected/AllCourses'))
 const LearningManagement = lazy(() => import('../pages/protected/LearningManagement'))
 const CommunityManagement = lazy(() => import('../pages/protected/CommunityManagement'))
 const AddGroup = lazy(() => import('../pages/protected/AddGroups'))
+const QuizDetails = lazy(() => import('../pages/protected/QuizDetails'))
+const CourseDetails = lazy(() => import('../pages/protected/CourseDetails'))
+
 
 
 
@@ -73,6 +76,14 @@ const routes = [
   {
     path: '/learning-management',
     component: LearningManagement,
+  },
+  {
+    path: '/quiz-details',
+    component: QuizDetails,
+  },
+  {
+    path: '/course-details',
+    component: CourseDetails,
   },
   {
     path: '/add-quiz',
