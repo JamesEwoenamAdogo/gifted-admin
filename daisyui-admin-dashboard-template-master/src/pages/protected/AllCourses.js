@@ -48,12 +48,12 @@ export default function ItemList() {
               >
                 Show Details
               </button>
-              <button
+              {/* <button
                 className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                 onClick={() => handleUpdate(item)}
               >
                 Update
-              </button>
+              </button> */}
             </div>
           </div>
         ))}

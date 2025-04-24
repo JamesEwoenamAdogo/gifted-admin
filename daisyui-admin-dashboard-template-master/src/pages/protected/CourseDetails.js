@@ -8,6 +8,8 @@ const CourseDetails = () => {
   const [showFileModal, setShowFileModal] = useState(false);
   const [newFiles, setNewFiles] = useState([]);
   const [imagePreview, setImagePreview] = useState(null);
+  const [reload,setReload]= useState(false)
+  
 
   useEffect(() => {
     const loadCourseDetails = async () => {
@@ -15,7 +17,7 @@ const CourseDetails = () => {
       setDetails({ ...response.data.courseDetails });
     };
     loadCourseDetails();
-  }, [editingField]);
+  }, [editingField,reload]);
 
   const openEditModal = (field) => {
     setFormData({ [field]: details[field] });
@@ -111,6 +113,7 @@ const CourseDetails = () => {
     }
   };
 
+
   const handleDeleteFile = async (index) => {
     const updatedFiles = details.files.filter((_, i) => i !== index);
     setDetails({ ...details, files: updatedFiles });
@@ -121,6 +124,7 @@ const CourseDetails = () => {
         { files: updatedFiles }
       );
       console.log(response);
+      setReload(!reload)
     } catch (error) {
       console.error("Failed to update course details:", error);
     }

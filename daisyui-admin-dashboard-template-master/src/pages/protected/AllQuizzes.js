@@ -50,12 +50,12 @@ export default function ItemList() {
               >
                 Show all Questions
               </button>
-              <button
+              {/* <button
                 className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                 onClick={() => handleUpdate(item._id)}
               >
                 Update
-              </button>
+              </button> */}
             </div>
           </div>
         ))}
