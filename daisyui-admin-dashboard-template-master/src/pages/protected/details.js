@@ -38,8 +38,12 @@ function Details(){
         console.log(response.data.AllCompetitions)
 	    const allCompetition =response.data.AllCompetitions
         const competition = allCompetition.find((item)=>{return item._id==id})
-        setCompetitionName(competition.name)
-        setSubtypes(()=>{return [...competition.subTypes]})
+        console.log(competition)
+        if(competition.subTypes.length!==0){
+            setCompetitionName(competition.name)
+            setSubtypes(()=>{return [...competition.subTypes]})
+        }
+       
         
         
     }
