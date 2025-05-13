@@ -66,6 +66,11 @@ const routes = [
     icon: <FaArrowsAltH className={iconClasses}/>, // icon component
     name: 'Community', // name that appear in Sidebar
   },
+  {
+    path: '/app/interest-page', // url
+    icon: <FaArrowsAltH className={iconClasses}/>, // icon component
+    name: 'Interest', // name that appear in Sidebar
+  },
  
   // {
   //   path: '/app/charts', // url

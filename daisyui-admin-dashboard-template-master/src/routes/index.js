@@ -1,6 +1,7 @@
 // All components mapping with path for internal routes
 
 import { lazy } from 'react'
+// import InterestPage from '../pages/protected/InterestPage'
 
 const Dashboard = lazy(() => import('../pages/protected/Dashboard'))
 const Welcome = lazy(() => import('../pages/protected/Welcome'))
@@ -33,6 +34,9 @@ const CommunityManagement = lazy(() => import('../pages/protected/CommunityManag
 const AddGroup = lazy(() => import('../pages/protected/AddGroups'))
 const QuizDetails = lazy(() => import('../pages/protected/QuizDetails'))
 const CourseDetails = lazy(() => import('../pages/protected/CourseDetails'))
+const InterestPage = lazy(() => import('../pages/protected/InterestPage'))
+const AddInterest = lazy(() => import('../pages/protected/AddInterest'))
+const AllInterest = lazy(() => import('../pages/protected/AllInterest'))
 
 
 
@@ -96,6 +100,18 @@ const routes = [
   {
     path: '/add-course',
     component: AddCourse,
+  },
+  {
+    path: '/interest-page',
+    component: InterestPage,
+  },
+  {
+    path: '/add-interest',
+    component: AddInterest,
+  },
+  {
+    path: '/all-interest',
+    component: AllInterest,
   },
   {
     path: '/community-management',
