@@ -7,8 +7,9 @@ export default function CreateQuiz() {
   const [description, setDescription] = useState("");
   const [time, setTime] = useState(0);
   const [numberOfQuestions, setNumberOfQuestions] = useState("");
-  const [grade, setGrade] = useState(""); // New state for grade
+  const [grade, setGrade] = useState("");
   const [image, setImage] = useState({});
+  const [isFeatured, setIsFeatured] = useState(false); // ✅ New state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,11 +18,12 @@ export default function CreateQuiz() {
     formData.append("description", description);
     formData.append("time", time);
     formData.append("numberOfQuestions", numberOfQuestions);
-    formData.append("grade", grade); // Include grade in the form
+    formData.append("grade", grade);
     formData.append("image", image);
+    formData.append("featured", isFeatured); // ✅ Include isFeatured
     formData.append("questions", JSON.stringify(questions));
 
-    questions.forEach((q, index) => {
+    questions.forEach((q) => {
       if (q.image) {
         formData.append("questionImages", q.image);
       }
@@ -40,7 +42,13 @@ export default function CreateQuiz() {
   const addQuestion = () => {
     setQuestions([
       ...questions,
-      { question: "", answers: ["", "", "", ""], correctAnswer: null, image: null, explanation: "" },
+      {
+        question: "",
+        answers: ["", "", "", ""],
+        correctAnswer: null,
+        image: null,
+        explanation: "",
+      },
     ]);
   };
 
@@ -58,7 +66,8 @@ export default function CreateQuiz() {
 
   const selectCorrectAnswer = (qIndex, aIndex) => {
     const updatedQuestions = [...questions];
-    updatedQuestions[qIndex].correctAnswer = updatedQuestions[qIndex].answers[aIndex];
+    updatedQuestions[qIndex].correctAnswer =
+      updatedQuestions[qIndex].answers[aIndex];
     setQuestions(updatedQuestions);
   };
 
@@ -75,8 +84,16 @@ export default function CreateQuiz() {
   };
 
   useEffect(() => {
-    console.log(title, description, time, numberOfQuestions, grade, questions);
-  }, [title, description, time, numberOfQuestions, grade]);
+    console.log(
+      title,
+      description,
+      time,
+      numberOfQuestions,
+      grade,
+      isFeatured,
+      questions
+    );
+  }, [title, description, time, numberOfQuestions, grade, isFeatured]);
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
@@ -97,11 +114,18 @@ export default function CreateQuiz() {
       <label className="block mb-2">Number of Questions</label>
       <input type="number" className="w-full p-2 border rounded mb-4" min="1" onChange={(e) => setNumberOfQuestions(e.target.value)} />
 
-      {/* New Grade Input Field */}
       <label className="block mb-2">Grade</label>
       <input type="text" className="w-full p-2 border rounded mb-4" onChange={(e) => setGrade(e.target.value)} />
 
-    
+      {/* ✅ Featured Checkbox */}
+      <label className="flex items-center space-x-2 mb-4">
+        <input
+          type="checkbox"
+          checked={isFeatured}
+          onChange={(e) => setIsFeatured(e.target.checked)}
+        />
+        <span>Feature this quiz</span>
+      </label>
 
       {questions.map((q, qIndex) => (
         <div key={qIndex} className="border p-4 rounded mb-4">
@@ -122,6 +146,7 @@ export default function CreateQuiz() {
           <textarea className="w-full p-2 border rounded mb-4" value={q.explanation} onChange={(e) => updateExplanation(qIndex, e.target.value)}></textarea>
         </div>
       ))}
+
       <button className="bg-blue-500 text-white px-4 py-2 rounded mb-4" onClick={addQuestion}>
         Add New Question
       </button>
