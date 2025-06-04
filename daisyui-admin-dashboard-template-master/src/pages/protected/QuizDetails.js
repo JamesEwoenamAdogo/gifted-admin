@@ -6,6 +6,7 @@ const QuizDetails = () => {
   const [editingField, setEditingField] = useState(null);
   const [formData, setFormData] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
+  const [newQuestion,setNewQuestion]= useState(false)
 
   useEffect(() => {
     const loadQuizDetails = async () => {
@@ -19,6 +20,7 @@ const QuizDetails = () => {
     if (field.startsWith("question-")) {
       const index = parseInt(field.split("-")[1]);
       setFormData({ ...details.questions[index], index });
+      setImagePreview(details.questions[index]?.image || null);
     } else {
       setFormData({ [field]: details[field] });
       if (field === 'image') {
@@ -46,46 +48,75 @@ const QuizDetails = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    console.log(file)
     if (file) {
-      setFormData({ image: file });
+      setFormData({ ...formData, image: file });
       setImagePreview(URL.createObjectURL(file));
     }
   };
 
   const handleSave = async () => {
     const token = localStorage.getItem("token");
-    let payload;
 
     if (editingField.startsWith("question-")) {
       const index = formData.index;
-      const updatedQuestions = [...details.questions];
-      const { index: _, ...updatedData } = formData;
-      updatedQuestions[index] = updatedData;
-      payload = { questions: updatedQuestions };
-    } else if (editingField === 'image') {
-      payload = new FormData();
-      payload.append('image', formData.image);
-    } else {
-      payload = { [editingField]: formData[editingField] };
-    }
-    console.log(payload)
-    try {
-      await axios.put(
-        `/update-exams/${localStorage.getItem("id")}`,
-        payload instanceof FormData ? payload : JSON.stringify(payload),
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            ...(payload instanceof FormData
-              ? { 'Content-Type': 'multipart/form-data' }
-              : { 'Content-Type': 'application/json' })
+      const form = new FormData();
+
+      form.append("question", formData.question);
+      form.append("explanation", formData.explanation);
+      form.append("correctAnswer", formData.correctAnswer);
+      formData.answers.forEach((ans, i) => {
+        form.append(`answers[${i}]`, ans);
+      });
+      if (formData.image instanceof File) {
+        form.append("image", formData.image);
+      }
+      console.log(index)
+      form.forEach((value, key) => {
+        console.log(`${key}:`, value);
+    });
+      try {
+        await axios.put(
+          `/update-question/${localStorage.getItem("id")}/${index}`,
+          form,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data"
+            }
           }
-        }
-      );
-      setEditingField(null);
-    } catch (error) {
-      console.error("Update failed:", error);
+        );
+        setEditingField(null);
+      } catch (error) {
+        console.error("Question update failed:", error);
+      }
+
+    } else {
+      let payload;
+      if (editingField === 'image') {
+        const form = new FormData();
+        form.append("image", formData.image);
+        payload = form;
+      } else {
+        payload = { [editingField]: formData[editingField] };
+      }
+
+      try {
+        await axios.put(
+          `/update-exams/${localStorage.getItem("id")}`,
+          payload instanceof FormData ? payload : JSON.stringify(payload),
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              ...(payload instanceof FormData
+                ? { 'Content-Type': 'multipart/form-data' }
+                : { 'Content-Type': 'application/json' }),
+            },
+          }
+        );
+        setEditingField(null);
+      } catch (error) {
+        console.error("Update failed:", error);
+      }
     }
   };
 
@@ -98,7 +129,10 @@ const QuizDetails = () => {
     </button>
   );
 
-  const handleAddQuestion = () => {
+  const handleAddQuestion = async() => {
+    if(!newQuestion){
+
+    
     const newQuestion = {
       question: "",
       answers: ["", "", "", ""],
@@ -106,21 +140,34 @@ const QuizDetails = () => {
       image: null,
       explanation: ""
     };
+    const updatedQuestions = [...(details.questions || []), newQuestion];
     setDetails((prevDetails) => ({
       ...prevDetails,
-      questions: [...(prevDetails.questions || []), newQuestion]
+      numberOfQuestions: updatedQuestions.length,
+      questions: updatedQuestions
     }));
+  }
+    if(newQuestion["question"]){
+      const response = await axios.put(`/add-question/${localStorage.getItem("id")}`,newQuestion)
+      console.log(response)
+      
+    }
+    
   };
 
   const handleDeleteQuestion = async (indexToDelete) => {
     const token = localStorage.getItem("token");
     const updatedQuestions = details.questions.filter((_, index) => index !== indexToDelete);
-    setDetails((prevDetails) => ({ ...prevDetails, questions: updatedQuestions }));
+    setDetails((prevDetails) => ({
+      ...prevDetails,
+      numberOfQuestions: updatedQuestions.length,
+      questions: updatedQuestions
+    }));
 
     try {
       await axios.put(
         `/update-exams/${localStorage.getItem("id")}`,
-        JSON.stringify({ questions: updatedQuestions }),
+        JSON.stringify({ questions: updatedQuestions, numberOfQuestions: updatedQuestions.length }),
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -141,14 +188,17 @@ const QuizDetails = () => {
         <p><strong>Title:</strong> {details.title} {renderEditButton('title')}</p>
         <p><strong>Description:</strong> {details.description} {renderEditButton('description')}</p>
         <p><strong>Time:</strong> {details.time} mins {renderEditButton('time')}</p>
-        <p><strong>Number of Questions:</strong> {details.numberOfQuestions} {renderEditButton('numberOfQuestions')}</p>
+        <p><strong>Number of Questions:</strong> {details.numberOfQuestions}</p>
         <p><strong>Grade:</strong> {details.grade} {renderEditButton('grade')}</p>
+        <p><strong>Featured:</strong> {details.featured ? "Yes" : "No"} {renderEditButton('featured')}</p>
         <div className="my-4">
           <p><strong>Image:</strong> {renderEditButton('image')}</p>
           {details.image && (
             <img src={details.image} alt="Quiz" className="mt-2 w-64 h-auto rounded" />
           )}
         </div>
+        <p><strong>Created At:</strong> {new Date(details.createdAt).toLocaleString()}</p>
+        <p><strong>Updated At:</strong> {new Date(details.updatedAt).toLocaleString()}</p>
       </div>
 
       <div>
@@ -189,6 +239,16 @@ const QuizDetails = () => {
                 <input type="file" accept="image/*" onChange={handleImageChange} />
                 {imagePreview && <img src={imagePreview} alt="Preview" className="mt-4 w-64 h-auto" />}
               </div>
+            ) : editingField === 'featured' ? (
+              <div className="flex items-center gap-2">
+                <label className="font-medium">Featured:</label>
+                <input
+                  type="checkbox"
+                  name="featured"
+                  checked={formData.featured || false}
+                  onChange={handleChange}
+                />
+              </div>
             ) : editingField.startsWith("question-") ? (
               <div className="space-y-4">
                 <input
@@ -219,7 +279,12 @@ const QuizDetails = () => {
                   onChange={handleChange}
                   placeholder="Explanation"
                   className="w-full p-2 border rounded"
-                ></textarea>
+                />
+                <div>
+                  <label className="block mb-1">Question Image:</label>
+                  <input type="file" accept="image/*" onChange={handleImageChange} />
+                  {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 w-64 h-auto" />}
+                </div>
               </div>
             ) : (
               <input

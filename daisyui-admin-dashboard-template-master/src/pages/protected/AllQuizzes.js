@@ -1,36 +1,36 @@
-import { useEffect, useState,useRef } from "react";
-import axios from "axios"
-// import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function ItemList() {
-  // let Quizitems =[]
-  // const ref= useRef(Quizitems)
-  // const navigate = useNavigate()
   const [items, setItems] = useState([]);
-  useEffect(()=>{
-    const fetchExams = async()=>{
-      const response = await axios.get("/all-exams")
-      console.log(response)
-    
-        setItems(()=>{return [...response.data.allExaminations]})
-    
-      console.log(items)
-      
-    }
-    fetchExams()
-  },[])
 
-  const handleUpdate = (id) => {
-    // alert(`Update item with ID: ${id}`);
-    // localStorage.setItem("id",id)
-    // window.location.href="/app/quiz-details"
-  };
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        const response = await axios.get("/all-exams");
+        setItems(response.data.allExaminations || []);
+      } catch (error) {
+        console.error("Error fetching exams:", error);
+      }
+    };
+    fetchExams();
+  }, []);
 
   const handleViewDetails = (item) => {
-    // alert(`Details:\nName: ${item.name}\nDescription: ${item.description}`);
-    localStorage.setItem("id",item._id)
-    window.location.href="/app/quiz-details"
+    localStorage.setItem("id", item._id);
+    window.location.href = "/app/quiz-details";
+  };
 
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this quiz?")) {
+      try {
+        await axios.delete(`/delete-exam/${id}`);
+        setItems((prev) => prev.filter((item) => item._id !== id));
+      } catch (error) {
+        console.error("Error deleting quiz:", error);
+        alert("Failed to delete the quiz.");
+      }
+    }
   };
 
   return (
@@ -38,7 +38,10 @@ export default function ItemList() {
       <h1 className="text-2xl font-bold mb-4">Item List</h1>
       <div className="space-y-4">
         {items.map((item) => (
-          <div key={item.id} className="p-4 border rounded-lg shadow-md flex justify-between items-center">
+          <div
+            key={item._id}
+            className="p-4 border rounded-lg shadow-md flex justify-between items-center"
+          >
             <div>
               <h2 className="text-lg font-semibold">{item.title}</h2>
               <p className="text-gray-600 text-sm">{item.description}</p>
@@ -50,12 +53,12 @@ export default function ItemList() {
               >
                 Show all Questions
               </button>
-              {/* <button
-                className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                onClick={() => handleUpdate(item._id)}
+              <button
+                className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                onClick={() => handleDelete(item._id)}
               >
-                Update
-              </button> */}
+                Delete
+              </button>
             </div>
           </div>
         ))}
