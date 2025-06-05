@@ -50,6 +50,10 @@ const routes = [
     icon: <InboxArrowDownIcon className={iconClasses}/>, // icon component
     name: 'Assessment Management', // name that appear in Sidebar
   },
+  {
+    path:"/app/fetch-scores",
+    name:"Quiz Results"
+  },
  
   {
     path: '/app/addOns', // url

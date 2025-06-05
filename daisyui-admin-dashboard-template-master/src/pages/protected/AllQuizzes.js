@@ -7,7 +7,7 @@ export default function ItemList() {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const response = await axios.get("/all-exams");
+        const response = await axios.get("/all-exams-admin");
         setItems(response.data.allExaminations || []);
       } catch (error) {
         console.error("Error fetching exams:", error);

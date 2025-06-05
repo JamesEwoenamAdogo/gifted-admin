@@ -6,7 +6,7 @@ const QuizDetails = () => {
   const [editingField, setEditingField] = useState(null);
   const [formData, setFormData] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
-  const [newQuestion,setNewQuestion]= useState(false)
+  const [newQuestion, setNewQuestion] = useState(false);
 
   useEffect(() => {
     const loadQuizDetails = async () => {
@@ -70,10 +70,7 @@ const QuizDetails = () => {
       if (formData.image instanceof File) {
         form.append("image", formData.image);
       }
-      console.log(index)
-      form.forEach((value, key) => {
-        console.log(`${key}:`, value);
-    });
+
       try {
         await axios.put(
           `/update-question/${localStorage.getItem("id")}/${index}`,
@@ -129,30 +126,26 @@ const QuizDetails = () => {
     </button>
   );
 
-  const handleAddQuestion = async() => {
-    if(!newQuestion){
-
-    
-    const newQuestion = {
-      question: "",
-      answers: ["", "", "", ""],
-      correctAnswer: null,
-      image: null,
-      explanation: ""
-    };
-    const updatedQuestions = [...(details.questions || []), newQuestion];
-    setDetails((prevDetails) => ({
-      ...prevDetails,
-      numberOfQuestions: updatedQuestions.length,
-      questions: updatedQuestions
-    }));
-  }
-    if(newQuestion["question"]){
-      const response = await axios.put(`/add-question/${localStorage.getItem("id")}`,newQuestion)
-      console.log(response)
-      
+  const handleAddQuestion = async () => {
+    if (!newQuestion) {
+      const question = {
+        question: "",
+        answers: ["", "", "", ""],
+        correctAnswer: null,
+        image: null,
+        explanation: ""
+      };
+      const updatedQuestions = [...(details.questions || []), question];
+      setDetails((prevDetails) => ({
+        ...prevDetails,
+        numberOfQuestions: updatedQuestions.length,
+        questions: updatedQuestions
+      }));
     }
-    
+    if (newQuestion["question"]) {
+      const response = await axios.put(`/add-question/${localStorage.getItem("id")}`, newQuestion);
+      console.log(response);
+    }
   };
 
   const handleDeleteQuestion = async (indexToDelete) => {
@@ -191,6 +184,9 @@ const QuizDetails = () => {
         <p><strong>Number of Questions:</strong> {details.numberOfQuestions}</p>
         <p><strong>Grade:</strong> {details.grade} {renderEditButton('grade')}</p>
         <p><strong>Featured:</strong> {details.featured ? "Yes" : "No"} {renderEditButton('featured')}</p>
+        <p><strong>Published:</strong> {details.publish ? "Yes" : "No"} {renderEditButton('publish')}</p>
+        <p><strong>Attempts Allowed:</strong> {details.attemptsAllowed} {renderEditButton('attemptsAllowed')}</p>
+        <p><strong>Allow Review:</strong> {details.allowQuizReview ? "Yes" : "No"} {renderEditButton('allowQuizReview')}</p>
         <div className="my-4">
           <p><strong>Image:</strong> {renderEditButton('image')}</p>
           {details.image && (
@@ -239,14 +235,25 @@ const QuizDetails = () => {
                 <input type="file" accept="image/*" onChange={handleImageChange} />
                 {imagePreview && <img src={imagePreview} alt="Preview" className="mt-4 w-64 h-auto" />}
               </div>
-            ) : editingField === 'featured' ? (
+            ) : editingField === 'featured' || editingField === 'publish' || editingField === 'allowQuizReview' ? (
               <div className="flex items-center gap-2">
-                <label className="font-medium">Featured:</label>
+                <label className="font-medium capitalize">{editingField.replace(/([A-Z])/g, ' $1')}</label>
                 <input
                   type="checkbox"
-                  name="featured"
-                  checked={formData.featured || false}
+                  name={editingField}
+                  checked={!!formData[editingField]}
                   onChange={handleChange}
+                />
+              </div>
+            ) : editingField === 'attemptsAllowed' ? (
+              <div>
+                <label className="block mb-1">Attempts Allowed:</label>
+                <input
+                  type="number"
+                  name="attemptsAllowed"
+                  value={formData.attemptsAllowed || ''}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
                 />
               </div>
             ) : editingField.startsWith("question-") ? (
