@@ -12,7 +12,9 @@ export default function CreateQuiz() {
   const [isFeatured, setIsFeatured] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
   const [attemptsAllowed, setAttemptsAllowed] = useState(1);
-  const [allowReview, setAllowReview] = useState(false); // New state
+  const [allowReview, setAllowReview] = useState(false);
+  const [displayScores, setDisplayScores] = useState(false); // New state
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false); // New state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +28,9 @@ export default function CreateQuiz() {
     formData.append("featured", isFeatured);
     formData.append("publish", isPublished);
     formData.append("attemptsAllowed", attemptsAllowed);
-    formData.append("allowQuizReview", allowReview); // Add allowReview
+    formData.append("allowQuizReview", allowReview);
+    formData.append("displayScores", displayScores); // Append new field
+    formData.append("showFeedBackForm", showFeedbackForm); // Append new field
     formData.append("questions", JSON.stringify(questions));
 
     questions.forEach((q) => {
@@ -100,6 +104,8 @@ export default function CreateQuiz() {
       isPublished,
       attemptsAllowed,
       allowReview,
+      displayScores,
+      showFeedbackForm,
       questions
     );
   }, [
@@ -112,6 +118,8 @@ export default function CreateQuiz() {
     isPublished,
     attemptsAllowed,
     allowReview,
+    displayScores,
+    showFeedbackForm,
     questions,
   ]);
 
@@ -162,7 +170,6 @@ export default function CreateQuiz() {
         onChange={(e) => setGrade(e.target.value)}
       />
 
-      {/* Featured Checkbox */}
       <label className="flex items-center space-x-2 mb-4">
         <input
           type="checkbox"
@@ -172,7 +179,6 @@ export default function CreateQuiz() {
         <span>Feature this quiz</span>
       </label>
 
-      {/* Publish Checkbox */}
       <label className="flex items-center space-x-2 mb-4">
         <input
           type="checkbox"
@@ -182,7 +188,6 @@ export default function CreateQuiz() {
         <span>Publish this quiz</span>
       </label>
 
-      {/* Attempts Allowed Input */}
       <label className="block mb-2">Attempts Allowed</label>
       <input
         type="number"
@@ -192,7 +197,6 @@ export default function CreateQuiz() {
         onChange={(e) => setAttemptsAllowed(e.target.value)}
       />
 
-      {/* Allow Review Checkbox */}
       <label className="flex items-center space-x-2 mb-4">
         <input
           type="checkbox"
@@ -200,6 +204,24 @@ export default function CreateQuiz() {
           onChange={(e) => setAllowReview(e.target.checked)}
         />
         <span>Allow Review After Completion</span>
+      </label>
+
+      <label className="flex items-center space-x-2 mb-4">
+        <input
+          type="checkbox"
+          checked={displayScores}
+          onChange={(e) => setDisplayScores(e.target.checked)}
+        />
+        <span>Display Scores After Submission</span>
+      </label>
+
+      <label className="flex items-center space-x-2 mb-4">
+        <input
+          type="checkbox"
+          checked={showFeedbackForm}
+          onChange={(e) => setShowFeedbackForm(e.target.checked)}
+        />
+        <span>Show Feedback Form After Quiz</span>
       </label>
 
       {questions.map((q, qIndex) => (

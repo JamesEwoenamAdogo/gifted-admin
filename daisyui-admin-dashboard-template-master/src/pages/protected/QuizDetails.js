@@ -187,6 +187,10 @@ const QuizDetails = () => {
         <p><strong>Published:</strong> {details.publish ? "Yes" : "No"} {renderEditButton('publish')}</p>
         <p><strong>Attempts Allowed:</strong> {details.attemptsAllowed} {renderEditButton('attemptsAllowed')}</p>
         <p><strong>Allow Review:</strong> {details.allowQuizReview ? "Yes" : "No"} {renderEditButton('allowQuizReview')}</p>
+        <p><strong>Display Scores:</strong> {details.displayScores ? "Yes" : "No"} {renderEditButton('displayScores')}</p>
+        {/* <p><strong>Item Display Scores:</strong> {details.itemdisplayScores ? "Yes" : "No"} {renderEditButton('displayScores')}</p> */}
+        <p><strong>Show Feedback Form:</strong> {details.showFeedBackForm ? "Yes" : "No"} {renderEditButton('showFeedBackForm')}</p>
+
         <div className="my-4">
           <p><strong>Image:</strong> {renderEditButton('image')}</p>
           {details.image && (
@@ -235,7 +239,7 @@ const QuizDetails = () => {
                 <input type="file" accept="image/*" onChange={handleImageChange} />
                 {imagePreview && <img src={imagePreview} alt="Preview" className="mt-4 w-64 h-auto" />}
               </div>
-            ) : editingField === 'featured' || editingField === 'publish' || editingField === 'allowQuizReview' ? (
+            ) : ['featured', 'publish', 'allowQuizReview', 'displayScores', 'itemdisplayScores', 'showFeedBackForm'].includes(editingField) ? (
               <div className="flex items-center gap-2">
                 <label className="font-medium capitalize">{editingField.replace(/([A-Z])/g, ' $1')}</label>
                 <input

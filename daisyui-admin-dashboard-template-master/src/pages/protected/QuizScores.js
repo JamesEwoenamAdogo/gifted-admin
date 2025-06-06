@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const StudentScores = () => {
   const [quizzes, setQuizzes] = useState([]);
@@ -7,13 +9,11 @@ const StudentScores = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [results, setResults] = useState([]);
 
-  // Generate years from 2015 to current year
   const years = Array.from(
     { length: new Date().getFullYear() - 2015 + 1 },
     (_, i) => 2015 + i
   );
 
-  // Fetch quizzes on load
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
@@ -26,7 +26,6 @@ const StudentScores = () => {
     fetchQuizzes();
   }, []);
 
-  // Fetch results when quiz or year changes
   useEffect(() => {
     const fetchResults = async () => {
       if (!selectedQuizId || !selectedYear) return;
@@ -43,13 +42,37 @@ const StudentScores = () => {
     fetchResults();
   }, [selectedQuizId, selectedYear]);
 
-  const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+  const formatDateTime = (createdAt) => {
+    const date = new Date(createdAt);
+    return date.toLocaleString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
+  };
+
+  const handleExport = () => {
+    const data = results.map((student, index) => ({
+      Rank: index + 1,
+      "Full Name": student.fullName,
+      School: student.school,
+      Grade: student.grade,
+      Score: `${student.correctAnswers}/${student.numberOfQuestions}`,
+      "Date Taken": formatDateTime(student.createdAt),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Student Scores");
+
+    const blob = new Blob(
+      [XLSX.write(workbook, { bookType: "xlsx", type: "array" })],
+      { type: "application/octet-stream" }
+    );
+    saveAs(blob, "student_scores.xlsx");
   };
 
   return (
@@ -58,7 +81,7 @@ const StudentScores = () => {
         <h1 className="text-3xl font-bold text-blue-900 mb-6">Student Score Rankings</h1>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row gap-4 mb-8 items-start sm:items-center">
           <select
             onChange={(e) => setSelectedQuizId(e.target.value)}
             value={selectedQuizId}
@@ -83,6 +106,15 @@ const StudentScores = () => {
               </option>
             ))}
           </select>
+
+          {results.length > 0 && (
+            <button
+              onClick={handleExport}
+              className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              Export to Excel
+            </button>
+          )}
         </div>
 
         {/* Table */}
@@ -118,7 +150,7 @@ const StudentScores = () => {
                     <td className="py-3 px-4 font-semibold text-blue-700">
                       {student.correctAnswers}/{student.numberOfQuestions}
                     </td>
-                    <td className="py-3 px-4">{formatDate(student.date)}</td>
+                    <td className="py-3 px-4">{formatDateTime(student.createdAt)}</td>
                   </tr>
                 ))
               )}
