@@ -150,7 +150,7 @@ const StudentScores = () => {
                     <td className="py-3 px-4 font-semibold text-blue-700">
                       {student.correctAnswers}/{student.numberOfQuestions}
                     </td>
-                    <td className="py-3 px-4">{formatDateTime(student.createdAt)}</td>
+                    <td className="py-3 px-4">{formatDateTime(student.updatedAt)}</td>
                   </tr>
                 ))
               )}
