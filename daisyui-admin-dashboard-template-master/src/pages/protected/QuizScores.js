@@ -127,7 +127,7 @@ const StudentScores = () => {
                 <th className="py-3 px-4">School</th>
                 <th className="py-3 px-4">Grade</th>
                 <th className="py-3 px-4">Score</th>
-                <th className="py-3 px-4">Date Taken</th>
+                <th className="py-3 px-4">Date Completed</th>
               </tr>
             </thead>
             <tbody className="text-gray-700">
