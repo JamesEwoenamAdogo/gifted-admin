@@ -6,6 +6,7 @@ import { openModal } from "../common/modalSlice"
 import { deleteLead, getLeadsContent } from "./leadSlice"
 import { CONFIRMATION_MODAL_CLOSE_TYPES, MODAL_BODY_TYPES } from '../../utils/globalConstantUtil'
 import TrashIcon from '@heroicons/react/24/outline/TrashIcon'
+import { FaEdit } from "react-icons/fa";
 import { IoPeopleCircleSharp } from "react-icons/io5";
 
 import { FcViewDetails } from "react-icons/fc";
@@ -84,7 +85,7 @@ function Leads(){
                                     <td>{l.EndDate}</td>
                                     <td>{l.cost}</td>
                                     <td>{}</td>
-                                    <td><button className="btn btn-square btn-ghost"><IoPeopleCircleSharp className="w-10"/></button><button className="btn btn-square btn-ghost" onClick={()=>{localStorage.setItem("subTypes",JSON.stringify(l.subTypes));localStorage.setItem("name",l.name); localStorage.setItem("id",l._id); window.location.href='/app/details'}}><TbListDetails className="w-5"/></button><button className="btn btn-square btn-ghost" onClick={() => deleteCurrentLead(k)}><TrashIcon className="w-5"/></button></td>
+                                    <td><button><FaEdit/></button><button className="btn btn-square btn-ghost" onClick={() => deleteCurrentLead(k)}><TrashIcon className="w-5"/></button></td>
                                     </tr>
                                 )
                             })

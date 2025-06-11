@@ -35,6 +35,7 @@ const StudentScores = () => {
           (a, b) => b.correctAnswers - a.correctAnswers
         );
         setResults(sorted);
+        console.log(sorted)
       } catch (error) {
         console.error("Error fetching results:", error);
       }

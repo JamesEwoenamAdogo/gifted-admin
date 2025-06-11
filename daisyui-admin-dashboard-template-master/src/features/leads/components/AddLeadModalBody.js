@@ -19,7 +19,7 @@ function AddLeadModalBody({ closeModal }) {
     const [errorMessage, setErrorMessage] = useState("");
     const [leadObj, setLeadObj] = useState(INITIAL_LEAD_OBJ);
 
-    const typeOptions = ["Mathematics", "Science", "English"];
+    const typeOptions = ["Mathematics", "Science", "English","ICT","Geography"];
     const [type, setType] = useState([]); // Changed to array for checkboxes
 
     const currentYear = new Date().getFullYear();
@@ -56,28 +56,14 @@ function AddLeadModalBody({ closeModal }) {
             id
         };
 
-        if (localStorage.getItem("add")) {
-            let newSubTypes = localStorage.getItem("subTypes")? [...JSON.parse(localStorage.getItem("subTypes")), newLeadObj]: [newLeadObj];
-
-            const response = await axios.put(
-                `/update-competition/${localStorage.getItem("id")}`,
-                { subTypes: newSubTypes }
-            );
-
-            if (response.data.success) {
-                dispatch(addNewLead({ newLeadObj }));
-                dispatch(showNotification({ message: "New Lead Added!", status: 1 }));
-                closeModal();
-                localStorage.setItem("add", "");
-            }
-        } else {
-            const response = await axios.post("/add-competition", newLeadObj);
-            if (response.data.success) {
-                dispatch(addNewLead({ newLeadObj }));
-                dispatch(showNotification({ message: "New item added", status: 1 }));
-                closeModal();
-            }
+     
+        const response = await axios.post("/add-competition", newLeadObj);
+        if (response.data.success) {
+            dispatch(addNewLead({ newLeadObj }));
+            dispatch(showNotification({ message: "New item added", status: 1 }));
+            closeModal();
         }
+        
     };
 
     const updateFormValue = ({ updateType, value }) => {
