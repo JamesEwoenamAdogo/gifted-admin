@@ -10,11 +10,12 @@ const INITIAL_LEAD_OBJ = {
     name: "",
     startDate: "",
     EndDate: "",
-    cost: "",
+    // cost: "",
     materialCost: "",
     assessmentCost: "",
     link: "",
-    customizableButton: ""
+    customizableButton: "",
+    Description:""
 };
 
 function AddLeadModalBody({ closeModal, competitionToEdit }) {
@@ -60,7 +61,7 @@ function AddLeadModalBody({ closeModal, competitionToEdit }) {
         if (!leadObj.name.trim()) return setErrorMessage("Name is required!");
         if (!leadObj.startDate.trim()) return setErrorMessage("Start Date required!");
         if (!leadObj.EndDate.trim()) return setErrorMessage("End Date required!");
-        if (!leadObj.cost.trim()) return setErrorMessage("Cost is required!");
+        // if (!leadObj.cost.trim()) return setErrorMessage("Cost is required!");
 
         const newLeadObj = {
             ...leadObj,
@@ -130,11 +131,11 @@ function AddLeadModalBody({ closeModal, competitionToEdit }) {
                     />
 
                     <InputText
-                        type="Number"
-                        defaultValue={leadObj.cost}
-                        updateType="cost"
+                        type="Text"
+                        defaultValue={leadObj.Description}
+                        updateType="Description"
                         containerStyle="mt-4"
-                        labelTitle="Participation Cost"
+                        labelTitle="Description"
                         updateFormValue={updateFormValue}
                     />
 
