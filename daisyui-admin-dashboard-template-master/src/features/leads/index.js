@@ -85,7 +85,24 @@ function Leads(){
                                     <td>{l.EndDate}</td>
                                     <td>{l.cost}</td>
                                     <td>{}</td>
-                                    <td><button><FaEdit/></button><button className="btn btn-square btn-ghost" onClick={() => deleteCurrentLead(k)}><TrashIcon className="w-5"/></button></td>
+                                    <td>
+                                    <button
+                                        onClick={() => {
+                                        localStorage.setItem("editCompetition", JSON.stringify(l));
+                                        window.location.href = "/app/edit-competition";
+                                        }}
+                                        className="mr-2"
+                                    >
+                                        <FaEdit />
+                                    </button>
+                                    <button
+                                        className="btn btn-square btn-ghost"
+                                        onClick={() => deleteCurrentLead(k)}
+                                    >
+                                        <TrashIcon className="w-5" />
+                                    </button>
+                                    </td>
+
                                     </tr>
                                 )
                             })

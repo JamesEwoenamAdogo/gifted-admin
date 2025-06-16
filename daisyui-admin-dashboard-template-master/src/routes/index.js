@@ -37,6 +37,7 @@ const CourseDetails = lazy(() => import('../pages/protected/CourseDetails'))
 const InterestPage = lazy(() => import('../pages/protected/InterestPage'))
 const AddInterest = lazy(() => import('../pages/protected/AddInterest'))
 const AllInterest = lazy(() => import('../pages/protected/AllInterest'))
+const EditCompetition = lazy(() => import('../pages/protected/EditCompetition'))
 const QuizScores = lazy(() => import('../pages/protected/QuizScores'))
 
 
@@ -77,6 +78,10 @@ const routes = [
   {
     path: '/assessment-management',
     component: AssessmentManagement,
+  },
+  {
+    path:'/edit-competition',
+    component:EditCompetition
   },
   {
     path: '/learning-management',
