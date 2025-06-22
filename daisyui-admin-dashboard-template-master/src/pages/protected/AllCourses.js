@@ -45,7 +45,7 @@ export default function ItemList() {
           >
             <div>
               <h2 className="text-lg font-semibold">{item.title}</h2>
-              <p className="text-gray-600 text-sm">{`${item.files.length} books added`}</p>
+              {/* <p className="text-gray-600 text-sm">{`${item.?.length} books added`}</p> */}
             </div>
             <div className="flex items-center space-x-2">
               <button
