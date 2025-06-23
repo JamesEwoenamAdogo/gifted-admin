@@ -10,7 +10,9 @@ export default function EditCompetition() {
     EndDate: "",
     materialCost:0,
     assessmentCost:0,
-    Description:""
+    Description:"",
+    customizableButton:"",
+    link:""
   });
 
   useEffect(() => {
@@ -20,7 +22,7 @@ export default function EditCompetition() {
       return navigate("/app/leads"); // fallback if accessed directly
     }
     setCompetition(data);
-  }, []);
+  }, [competition]);
 
   const handleChange = (e) => {
     setCompetition({ ...competition, [e.target.name]: e.target.value });
@@ -56,6 +58,22 @@ export default function EditCompetition() {
           value={competition.Description}
           onChange={handleChange}
           placeholder="Name"
+          className="input input-bordered w-full"
+        />
+        <input
+          type="text"
+          name="customizableButton"
+          value={competition.customizableButton}
+          onChange={handleChange}
+          placeholder="Name"
+          className="input input-bordered w-full"
+        />
+        <input
+          type="text"
+          name="link"
+          value={competition.link}
+          onChange={handleChange}
+          placeholder="link"
           className="input input-bordered w-full"
         />
         <input
