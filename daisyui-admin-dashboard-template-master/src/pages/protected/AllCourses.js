@@ -17,7 +17,7 @@ export default function ItemList() {
   }, []);
 
   const handleViewDetails = (item) => {
-    localStorage.setItem("id", item._id);
+    localStorage.setItem("courseInfo", JSON.stringify(item));
     window.location.href = "/app/course-details";
   };
 

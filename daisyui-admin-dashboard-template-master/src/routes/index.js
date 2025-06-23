@@ -39,6 +39,7 @@ const AddInterest = lazy(() => import('../pages/protected/AddInterest'))
 const AllInterest = lazy(() => import('../pages/protected/AllInterest'))
 const EditCompetition = lazy(() => import('../pages/protected/EditCompetition'))
 const QuizScores = lazy(() => import('../pages/protected/QuizScores'))
+const singleCoursePage = lazy(() => import('../pages/protected/SingleCourseDetail'))
 
 
 
@@ -146,6 +147,10 @@ const routes = [
   {
     path:"/fetch-scores",
     component: QuizScores
+  },
+  {
+    path:"/single-course",
+    component:singleCoursePage
   },
   {
     path:"/addons-input",

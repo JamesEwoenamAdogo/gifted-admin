@@ -24,6 +24,7 @@ export default function CreateCoursePage() {
       {
         title: "",
         description: "",
+        duration: "",
         includeImage: false,
         includePdf: false,
         includeVideo: false,
@@ -87,7 +88,6 @@ export default function CreateCoursePage() {
 
       const response = await axios.post("/upload-course-info", formData);
       if (response.data.success) {
-        console.log(response);
         alert("Course info submitted successfully!");
         localStorage.setItem("courseId", response.data.id);
       } else {
@@ -110,13 +110,9 @@ export default function CreateCoursePage() {
     const formData = new FormData();
     formData.append("title", module.title);
     formData.append("description", module.description);
-    let Videos=[]
-    module.videoLinks.forEach((link, i) => {
-      Videos.push(link)
-    });
-    formData.append(`Videos`, JSON.stringify(Videos));
-      // formData.append(`Videos`,JSON.stringify(module.VideoLinks));
+    formData.append("duration", module.duration);
 
+    formData.append("Videos", JSON.stringify(module.videoLinks));
 
     if (module.includeImage && module.images.length > 0) {
       module.images.forEach((file) => {
@@ -129,13 +125,9 @@ export default function CreateCoursePage() {
         formData.append("files", file);
       });
     }
-    for(let i of formData){
-      console.log(i)
-    }
 
     try {
       const response = await axios.post(`/upload-course-details/${courseId}`, formData);
-      console.log(response)
       if (response.data.success) {
         alert(`Module ${index + 1} submitted successfully!`);
       } else {
@@ -180,7 +172,6 @@ export default function CreateCoursePage() {
         </div>
       </div>
 
-      {/* Submit Course Info Button */}
       <div>
         <button
           onClick={handleSubmitCourseInfo}
@@ -197,6 +188,7 @@ export default function CreateCoursePage() {
           <div key={idx} className="border rounded p-4 space-y-3 bg-gray-50">
             <input placeholder="Module Title" className="border rounded p-2 w-full" value={mod.title} onChange={(e) => handleModuleChange(idx, "title", e.target.value)} />
             <textarea placeholder="Module Description" className="border rounded p-2 w-full" rows={3} value={mod.description} onChange={(e) => handleModuleChange(idx, "description", e.target.value)} />
+            <input placeholder="Module Duration (e.g., 1 week)" className="border rounded p-2 w-full" value={mod.duration} onChange={(e) => handleModuleChange(idx, "duration", e.target.value)} />
 
             <div className="flex flex-wrap gap-4">
               <label className="flex items-center gap-2">
@@ -228,7 +220,6 @@ export default function CreateCoursePage() {
               </div>
             )}
 
-            {/* Submit button for this module */}
             <div>
               <button
                 onClick={() => handleSubmitModule(idx)}
