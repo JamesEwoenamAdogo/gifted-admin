@@ -22,15 +22,12 @@ export default function AdminCreateGroup() {
     formData.append("trending",trending)
     if (image) formData.append("image", image);
 
-    const token = localStorage.getItem("token");
+    // const token = localStorage.getItem("token");
 
     try {
-      const res = await axios.post("/create-group", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          token,
-        },
-      });
+      const res = await axios.post("/create-group", formData);
+      console.log(res)
+      console.log(formData)
       setMessage("Group created successfully!");
       setName("");
       setDescription("");
@@ -40,6 +37,7 @@ export default function AdminCreateGroup() {
       setImage(null);
     } catch (err) {
       setMessage("Failed to create group.");
+      console.log(err)
     }
   };
 
