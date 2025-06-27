@@ -99,7 +99,7 @@ function UserDetails() {
         <h2 className="text-xl font-semibold mb-2 text-gray-700">Registered Items</h2>
         <ul className="list-disc list-inside text-gray-600">
           {registered.map((item, index) => (
-            <li key={index}>{`${item.name} ${item.year} ${item.cost}`}</li>
+            <li key={index}>{`${item.program} ${item.year} ${item.cost}`}</li>
           ))}
         </ul>
       </div>
@@ -107,7 +107,7 @@ function UserDetails() {
         <h2 className="text-xl font-semibold mb-2 text-gray-700">Pending Payments</h2>
         <ul className="list-disc list-inside text-gray-600">
           {invoice.map((item, index) => (
-            <li key={index}>{`${item.name} ${item.year} ${item.cost}`}</li>
+            <li key={index}>{`${item.program} ${item.year} ${item.cost}`}</li>
           ))}
         </ul>
       </div>
