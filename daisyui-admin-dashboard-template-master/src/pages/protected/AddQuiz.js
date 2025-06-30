@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 export default function CreateQuiz() {
   const [questions, setQuestions] = useState([]);
@@ -13,8 +15,8 @@ export default function CreateQuiz() {
   const [isPublished, setIsPublished] = useState(false);
   const [attemptsAllowed, setAttemptsAllowed] = useState(1);
   const [allowReview, setAllowReview] = useState(false);
-  const [displayScores, setDisplayScores] = useState(false); // New state
-  const [showFeedbackForm, setShowFeedbackForm] = useState(false); // New state
+  const [displayScores, setDisplayScores] = useState(false);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,8 +31,8 @@ export default function CreateQuiz() {
     formData.append("publish", isPublished);
     formData.append("attemptsAllowed", attemptsAllowed);
     formData.append("allowQuizReview", allowReview);
-    formData.append("displayScores", displayScores); // Append new field
-    formData.append("showFeedBackForm", showFeedbackForm); // Append new field
+    formData.append("displayScores", displayScores);
+    formData.append("showFeedBackForm", showFeedbackForm);
     formData.append("questions", JSON.stringify(questions));
 
     questions.forEach((q) => {
@@ -227,11 +229,19 @@ export default function CreateQuiz() {
       {questions.map((q, qIndex) => (
         <div key={qIndex} className="border p-4 rounded mb-4">
           <label className="block mb-2">Question</label>
-          <input
-            type="text"
-            className="w-full p-2 border rounded mb-4"
+          <ReactQuill
+            theme="snow"
             value={q.question}
-            onChange={(e) => updateQuestion(qIndex, e.target.value)}
+            onChange={(value) => updateQuestion(qIndex, value)}
+            className="mb-4"
+            modules={{
+              toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['clean'],
+              ],
+            }}
+            formats={['bold', 'italic', 'underline', 'list', 'bullet']}
           />
 
           <label className="block mb-2">Question Image</label>
