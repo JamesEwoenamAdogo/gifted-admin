@@ -40,6 +40,8 @@ const AllInterest = lazy(() => import('../pages/protected/AllInterest'))
 const EditCompetition = lazy(() => import('../pages/protected/EditCompetition'))
 const QuizScores = lazy(() => import('../pages/protected/QuizScores'))
 const singleCoursePage = lazy(() => import('../pages/protected/SingleCourseDetail'))
+const AllCommunities = lazy(() => import('../pages/protected/AllCommunities'))
+const GroupDetails = lazy(() => import('../pages/protected/GroupDetails'))
 
 
 
@@ -119,6 +121,14 @@ const routes = [
   {
     path: '/all-interest',
     component: AllInterest,
+  },
+  {
+    path: '/all-groups',
+    component: AllCommunities,
+  },
+  {
+    path: '/group-details',
+    component: GroupDetails,
   },
   {
     path: '/community-management',

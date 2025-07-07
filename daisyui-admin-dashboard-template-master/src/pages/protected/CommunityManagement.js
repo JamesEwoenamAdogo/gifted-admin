@@ -17,7 +17,7 @@ export default function QuizOptions() {
           <Eye size={48} className="text-green-500 mb-4" />
           <h2 className="text-xl font-semibold mb-2">View All Communities</h2>
           <p className="text-gray-600 mb-4">Browse and manage existing Communities.</p>
-          <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">View Community</button>
+          <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg" onClick={()=>{window.location.href="/app/all-groups"}} >View Community</button>
         </div>
       </div>
     </div>
