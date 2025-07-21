@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import 'katex/dist/katex.min.css';
+
 
 export default function CreateQuiz() {
   const [questions, setQuestions] = useState([]);
@@ -237,11 +239,22 @@ export default function CreateQuiz() {
             modules={{
               toolbar: [
                 ['bold', 'italic', 'underline'],
+                [{ script: 'sub' }, { script: 'super' }], // Subscript & Superscript
                 [{ list: 'ordered' }, { list: 'bullet' }],
                 ['clean'],
+                ['formula'],
+
               ],
             }}
-            formats={['bold', 'italic', 'underline', 'list', 'bullet']}
+            formats={[
+              'bold',
+              'italic',
+              'underline',
+              'script',
+              'list',
+              'bullet',
+              'formula'
+            ]}
           />
 
           <label className="block mb-2">Question Image</label>
@@ -252,20 +265,44 @@ export default function CreateQuiz() {
           />
 
           {q.answers.map((a, aIndex) => (
-            <div key={aIndex} className="flex items-center mb-2">
-              <input
-                type="text"
-                className="w-full p-2 border rounded mr-2"
-                value={a}
-                onChange={(e) => updateAnswer(qIndex, aIndex, e.target.value)}
-              />
-              <input
-                type="checkbox"
-                checked={q.correctAnswer === a}
-                onChange={() => selectCorrectAnswer(qIndex, aIndex)}
-              />
-            </div>
-          ))}
+  <div key={aIndex} className="mb-4">
+    <div className="flex items-start gap-2">
+      <div className="w-full">
+        <ReactQuill
+          theme="snow"
+          value={a}
+          onChange={(value) => updateAnswer(qIndex, aIndex, value)}
+          modules={{
+            toolbar: [
+              ['bold', 'italic', 'underline'],
+              [{ script: 'sub' }, { script: 'super' }],
+              [{ list: 'ordered' }, { list: 'bullet' }],
+              ['clean'],
+              ['formula'],
+            ],
+          }}
+          formats={[
+            'bold',
+            'italic',
+            'underline',
+            'script',
+            'list',
+            'bullet',
+            'formula',
+          ]}
+        />
+      </div>
+      <div className="mt-2">
+        <input
+          type="checkbox"
+          checked={q.correctAnswer === a}
+          onChange={() => selectCorrectAnswer(qIndex, aIndex)}
+        />
+      </div>
+    </div>
+  </div>
+))}
+
 
           <label className="block mb-2">Correct Answer Explanation</label>
           <textarea

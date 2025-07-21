@@ -10,12 +10,12 @@ const INITIAL_LEAD_OBJ = {
     name: "",
     startDate: "",
     EndDate: "",
-    // cost: "",
+    competitionCost: "",
     materialCost: "",
     assessmentCost: "",
     link: "",
     customizableButton: "",
-    Description:""
+    Description:"",
 };
 
 function AddLeadModalBody({ closeModal, competitionToEdit }) {
@@ -145,6 +145,14 @@ function AddLeadModalBody({ closeModal, competitionToEdit }) {
                         updateType="materialCost"
                         containerStyle="mt-4"
                         labelTitle="Course Materials Cost"
+                        updateFormValue={updateFormValue}
+                    />
+                    <InputText
+                        type="Number"
+                        defaultValue={leadObj.competitionCost}
+                        updateType="competitionCost"
+                        containerStyle="mt-4"
+                        labelTitle="Competition Cost"
                         updateFormValue={updateFormValue}
                     />
 

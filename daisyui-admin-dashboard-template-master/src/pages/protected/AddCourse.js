@@ -89,7 +89,7 @@ export default function CreateCoursePage() {
       const response = await axios.post("/upload-course-info", formData);
       if (response.data.success) {
         alert("Course info submitted successfully!");
-        localStorage.setItem("courseId", response.data.id);
+        localStorage.setItem("courseId", response.data._id);
       } else {
         throw new Error("Failed to submit course info");
       }
@@ -140,6 +140,7 @@ export default function CreateCoursePage() {
   };
 
   const handleSubmit = () => {
+
     console.log("Course Info:", courseInfo);
     console.log("Modules:", modules);
     alert("Course submitted! Check the console for details.");
