@@ -9,6 +9,7 @@ export default function EditCompetition() {
     name: "",
     startDate: "",
     EndDate: "",
+    competitionCost:0,
     materialCost: 0,
     assessmentCost: 0,
     Description: "",
@@ -105,6 +106,16 @@ export default function EditCompetition() {
           onChange={handleChange}
           className="input input-bordered w-full"
         />
+         <label><h1 className="font-semibold">Competition Cost</h1></label>
+
+        <input
+          type="number"
+          name="materialCost"
+          value={competition.competitionCost}
+          onChange={handleChange}
+          placeholder="Material Cost"
+          className="input input-bordered w-full"
+        />
        <label><h1 className="font-semibold">Material Cost</h1></label>
 
         <input
@@ -115,6 +126,7 @@ export default function EditCompetition() {
           placeholder="Material Cost"
           className="input input-bordered w-full"
         />
+      
        <label><h1 className="font-semibold">Assessment Cost</h1></label>
 
         <input

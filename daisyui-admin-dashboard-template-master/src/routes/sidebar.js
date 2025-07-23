@@ -54,6 +54,10 @@ const routes = [
     path:"/app/fetch-scores",
     name:"Quiz Results"
   },
+  {
+    path:"/app/feedback",
+    name:"Feedback"
+  },
  
   {
     path: '/app/addOns', // url

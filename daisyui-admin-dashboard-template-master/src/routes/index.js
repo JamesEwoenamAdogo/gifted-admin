@@ -42,6 +42,7 @@ const QuizScores = lazy(() => import('../pages/protected/QuizScores'))
 const singleCoursePage = lazy(() => import('../pages/protected/SingleCourseDetail'))
 const AllCommunities = lazy(() => import('../pages/protected/AllCommunities'))
 const GroupDetails = lazy(() => import('../pages/protected/GroupDetails'))
+const Feedback = lazy(() => import('../pages/protected/Feedback'))
 
 
 
@@ -157,6 +158,10 @@ const routes = [
   {
     path:"/fetch-scores",
     component: QuizScores
+  },
+  {
+    path:"/feedback",
+    component: Feedback
   },
   {
     path:"/single-course",

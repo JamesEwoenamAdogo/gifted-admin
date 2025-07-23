@@ -3,18 +3,34 @@ import axios from "axios";
 
 export default function ItemList() {
   const [items, setItems] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredItems, setFilteredItems] = useState([]);
 
   useEffect(() => {
     const fetchExams = async () => {
       try {
         const response = await axios.get("/all-exams-admin");
-        setItems(response.data.allExaminations || []);
+        const allExaminations = response.data.allExaminations || [];
+        setItems(allExaminations);
+        setFilteredItems(allExaminations);
       } catch (error) {
         console.error("Error fetching exams:", error);
       }
     };
     fetchExams();
   }, []);
+
+  useEffect(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      setFilteredItems(items);
+    } else {
+      const filtered = items.filter((item) =>
+        item.title.toLowerCase().includes(term)
+      );
+      setFilteredItems(filtered);
+    }
+  }, [searchTerm, items]);
 
   const handleViewDetails = (item) => {
     localStorage.setItem("id", item._id);
@@ -25,7 +41,9 @@ export default function ItemList() {
     if (window.confirm("Are you sure you want to delete this quiz?")) {
       try {
         await axios.delete(`/delete-exam/${id}`);
-        setItems((prev) => prev.filter((item) => item._id !== id));
+        const updatedItems = items.filter((item) => item._id !== id);
+        setItems(updatedItems);
+        setFilteredItems(updatedItems);
       } catch (error) {
         console.error("Error deleting quiz:", error);
         alert("Failed to delete the quiz.");
@@ -36,8 +54,21 @@ export default function ItemList() {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Item List</h1>
+
+      {/* Live Search Input */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search quizzes by name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="border px-3 py-2 rounded w-full"
+        />
+      </div>
+
+      {/* Quiz List */}
       <div className="space-y-4">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div
             key={item._id}
             className="p-4 border rounded-lg shadow-md flex justify-between items-center"
@@ -62,6 +93,10 @@ export default function ItemList() {
             </div>
           </div>
         ))}
+
+        {filteredItems.length === 0 && (
+          <p className="text-center text-gray-500">No quizzes found.</p>
+        )}
       </div>
     </div>
   );
