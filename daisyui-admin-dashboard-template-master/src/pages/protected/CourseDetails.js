@@ -1,108 +1,413 @@
-import React, {useState,useEffect} from "react";
-import { CheckCircle } from "lucide-react";
-import { useLocation } from "react-router-dom";
-import axios from "axios"
-// import {useNavigate} from "react-router"
+import React, { useState, useEffect } from "react";
+import { Pencil, Save, X, PlusCircle, Trash2 } from "lucide-react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function CourseDetailsPage() {
-  // const location = useLocation()
-  const courseData = localStorage.getItem("courseInfo")
-  const { files, title, grade, category, level,description ,duration} = JSON.parse(courseData);
-  const [course,setCourse] = useState([])
-  // const navigate = useNavigate()
+  const navigate = useNavigate();
+  const courseData = JSON.parse(localStorage.getItem("courseInfo"));
+  const courseId = courseData._id;
 
-  const courses= {
-    title: "Financial Literacy Mastery",
-    description:
-      "Build a comprehensive understanding of personal finance, from budgeting basics to advanced investment strategies.",
-    completedModules: 3,
-    totalModules: 8,
-    estimatedTime: "4-6 weeks",
-    progress: 38,
-    modules: [
-      {
-        title: "Budgeting Fundamentals",
-        level: "beginner",
-        description: "Learn to create and maintain a personal budget",
-        type: "Video",
-        duration: "15 min",
-        completed: true,
-      },
-      // Add more modules here if needed
-    ],
-  };
-  useEffect(()=>{
-    const loadCourseDetails= async()=>{
-      const response = await axios.get(`/fetch-course-details/${JSON.parse(courseData)._id}`)
-      console.log(response)
-      setCourse(response.data.course)
-      console.log(course)
+  const [courseInfo, setCourseInfo] = useState({});
+  const [modules, setModules] = useState([]);
+  const [editingField, setEditingField] = useState(null);
+  const [fieldValue, setFieldValue] = useState("");
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [moduleEditing, setModuleEditing] = useState({});
+  // Inside CourseDetailsPage component...
+
+const [fileUploadModuleId, setFileUploadModuleId] = useState(null);
+const [newVideos, setNewVideos] = useState("");
+const [videoEditingModuleId, setVideoEditingModuleId] = useState(null);
+
+const handleFilesUpload = async (moduleId, files) => {
+  try {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append("files", file);
     }
-    loadCourseDetails()
-  },[])
+
+    const res = await axios.put(`/upload-module/${moduleId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    const updated = await axios.put(`/update-module/${moduleId}`, {
+      files: res.data.files, // expecting `files: [url1, url2]`
+    });
+
+    setModules((prev) =>
+      prev.map((mod) => (mod._id === moduleId ? { ...mod, files: updated.data.files } : mod))
+    );
+    setFileUploadModuleId(null);
+  } catch (err) {
+    console.error("File upload error:", err);
+  }
+};
+
+const handleAddVideoLink = async (moduleId) => {
+  try {
+    const mod = modules.find((m) => m._id === moduleId);
+    const updatedVideos = [...(mod.Videos || []), newVideos.trim()];
+    await axios.put(`/update-module/${moduleId}`, {
+      Videos: updatedVideos,
+    });
+    setModules((prev) =>
+      prev.map((mod) => (mod._id === moduleId ? { ...mod, Videos: updatedVideos } : mod))
+    );
+    setVideoEditingModuleId(null);
+    setNewVideos("");
+  } catch (err) {
+    console.error("Error adding video:", err);
+  }
+};
+
+
+  useEffect(() => {
+    const fetchCourseInfo = async () => {
+      try {
+        const res = await axios.get(`/fetch-course-info/${courseId}`);
+        setCourseInfo(res.data.courseInfo);
+      } catch (error) {
+        console.error("Error fetching course info:", error);
+      }
+    };
+
+    const fetchModules = async () => {
+      try {
+        const res = await axios.get(`/fetch-course-details/${courseId}`);
+        setModules(res.data.course || []);
+      } catch (error) {
+        console.error("Error fetching modules:", error);
+      }
+    };
+
+    fetchCourseInfo();
+    fetchModules();
+  }, [courseId]);
+
+  const handleEditField = (field) => {
+    setEditingField(field);
+    setFieldValue(
+      Array.isArray(courseInfo[field])
+        ? courseInfo[field].join(", ")
+        : courseInfo[field]
+    );
+  };
+
+  const handleSaveField = async () => {
+    try {
+      let payload = {};
+
+      if (editingField === "thumbnail" && thumbnailFile) {
+        setUploading(true);
+        const formData = new FormData();
+        formData.append("thumbnail", thumbnailFile);
+
+        const uploadRes = await axios.put(`/update-course-info/${courseId}`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        payload.thumbnail = uploadRes.data.url;
+      } else if (editingField === "program") {
+        payload[editingField] = fieldValue.split(",").map((s) => s.trim());
+      } else {
+        payload[editingField] = fieldValue;
+      }
+
+      await axios.put(`/update-course-info/${courseId}`, payload);
+
+      setCourseInfo((prev) => ({
+        ...prev,
+        [editingField]: payload[editingField],
+      }));
+      setEditingField(null);
+      setThumbnailFile(null);
+      setUploading(false);
+    } catch (error) {
+      console.error("Failed to update field:", error);
+      setUploading(false);
+    }
+  };
+
+  const handleAddNew = () => {
+    navigate("/app/add-course-module");
+  };
+
+  const handleDeleteModule = async (moduleId) => {
+    try {
+      await axios.delete(`/delete-module/${moduleId}`);
+      setModules(modules.filter((mod) => mod._id !== moduleId));
+    } catch (error) {
+      console.error("Error deleting module:", error);
+    }
+  };
+
+  const handleModuleFieldEdit = (moduleId, field, value) => {
+    setModuleEditing({ moduleId, field });
+    setFieldValue(value);
+  };
+
+  const handleModuleFieldSave = async (moduleId) => {
+    try {
+      const payload = {
+        [moduleEditing.field]: fieldValue,
+      };
+      await axios.put(`/update-module/${moduleId}`, payload);
+      const updatedModules = modules.map((mod) =>
+        mod._id === moduleId ? { ...mod, ...payload } : mod
+      );
+      setModules(updatedModules);
+      setModuleEditing({});
+    } catch (err) {
+      console.error("Error updating module field:", err);
+    }
+  };
 
   return (
-    <div className="mx-auto p-6 space-y-6 bg-blue-50 min-h-screen w-[80%]">
-      {/* Header */}
-      <div className="space-y-2">
-        <button className="text-sm text-gray-600 hover:underline">&larr; Dashboard</button>
-        <h1 className="text-3xl font-bold">{title}</h1>
-        <p className="text-gray-700">{description}</p>
-      </div>
+    <div className="mx-auto p-6 space-y-6 bg-blue-50 min-h-screen w-[85%]">
+      <button
+        className="text-sm text-gray-600 hover:underline"
+        onClick={() => navigate(-1)}
+      >
+        &larr; Back to Dashboard
+      </button>
 
-      {/* Progress Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 bg-white rounded-xl shadow p-6 text-center gap-4">
-        <div>
-          <p className="text-3xl font-bold text-purple-600">{course.progress}%</p>
-          <p className="text-sm text-gray-500">Complete</p>
-        </div>
-        <div>
-          <p className="text-2xl font-semibold">{course.completedModules}/{course.totalModules}</p>
-          <p className="text-sm text-gray-500">Modules</p>
-        </div>
-        <div>
-          <p className="text-2xl font-semibold">{duration}</p>
-          <p className="text-sm text-gray-500">Estimated Time</p>
-        </div>
-        <div className="col-span-full">
-          <div className="w-full h-2 bg-gray-200 rounded-full mt-2">
-            <div
-              className="h-full bg-purple-700 rounded-full"
-              style={{ width: `${course.progress}%` }}
-            ></div>
+      <h1 className="text-3xl font-bold mb-4">Course Details</h1>
+
+      {/* COURSE INFO */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-6 rounded-xl shadow">
+        {[
+          "title",
+          "description",
+          "duration",
+          "grade",
+          "category",
+          "program",
+          "featured",
+          "thumbnail",
+        ].map((field) => (
+          <div key={field} className="flex flex-col">
+            <label className="text-sm font-medium text-gray-600 capitalize">
+              {field}
+            </label>
+            {editingField === field ? (
+              <div className="flex items-center gap-2 mt-1">
+                {field === "thumbnail" ? (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setThumbnailFile(e.target.files[0])}
+                    />
+                    <button
+                      onClick={handleSaveField}
+                      disabled={uploading}
+                      className="text-green-600"
+                    >
+                      {uploading ? "Uploading..." : <Save size={20} />}
+                    </button>
+                    <button onClick={() => setEditingField(null)}>
+                      <X size={20} className="text-gray-500" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      className="border px-2 py-1 rounded w-full"
+                      value={fieldValue}
+                      onChange={(e) => setFieldValue(e.target.value)}
+                    />
+                    <button onClick={handleSaveField}>
+                      <Save size={20} className="text-green-600" />
+                    </button>
+                    <button onClick={() => setEditingField(null)}>
+                      <X size={20} className="text-gray-500" />
+                    </button>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 mt-1">
+                {field === "thumbnail" ? (
+                  <img
+                    src={courseInfo.thumbnail}
+                    alt="Course Thumbnail"
+                    className="w-40 h-28 object-cover rounded border"
+                  />
+                ) : (
+                  <p className="text-gray-800 text-sm break-words">
+                    {Array.isArray(courseInfo[field])
+                      ? courseInfo[field].join(", ")
+                      : courseInfo[field]}
+                  </p>
+                )}
+                <button onClick={() => handleEditField(field)}>
+                  <Pencil size={18} className="text-blue-600" />
+                </button>
+              </div>
+            )}
           </div>
-        </div>
+        ))}
       </div>
 
-      {/* Modules */}
-      <div className="space-y-3">
-        <h2 className="text-xl font-semibold">Learning Modules</h2>
-        {course.map((mod, idx) => (
+      {/* ADD NEW MODULE */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleAddNew}
+          className="flex items-center gap-2 text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
+        >
+          <PlusCircle size={20} /> Add New Material
+        </button>
+      </div>
+
+      {/* MODULES LIST */}
+      <div className="space-y-4">
+        {modules.map((mod) => (
           <div
-            key={idx}
-            className="bg-white p-4 rounded-xl shadow flex items-center justify-between"
+            key={mod._id}
+            className="bg-white p-4 rounded-xl shadow border-l-4 border-blue-600"
           >
-            <div className="flex items-center gap-4">
-              <CheckCircle className="text-green-500" size={24} />
-              <div>
-                <div className="flex gap-2 items-center">
-                  <h3 className="font-semibold text-lg">{mod.title}</h3>
-                  <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-                    {/* {mod.level} */}
-                  </span>
+            <div className="flex justify-between items-start">
+              <div className="w-full space-y-2">
+                {/* TITLE */}
+                <div className="flex justify-between">
+                  {moduleEditing.moduleId === mod._id && moduleEditing.field === "title" ? (
+                    <div className="flex gap-2 w-full">
+                      <input
+                        value={fieldValue}
+                        onChange={(e) => setFieldValue(e.target.value)}
+                        className="border rounded px-2 py-1 w-full"
+                      />
+                      <button onClick={() => handleModuleFieldSave(mod._id)}>
+                        <Save size={20} className="text-green-600" />
+                      </button>
+                      <button onClick={() => setModuleEditing({})}>
+                        <X size={20} className="text-gray-500" />
+                      </button>
+                    </div>
+                  ) : (
+                    <h3 className="text-xl font-semibold flex items-center gap-2">
+                      {mod.title}
+                      <button onClick={() => handleModuleFieldEdit(mod._id, "title", mod.title)}>
+                        <Pencil size={16} className="text-blue-600" />
+                      </button>
+                    </h3>
+                  )}
+                  <div className="flex gap-2">
+                    <button onClick={() => navigate("/app/edit-course-module")}>
+                      <Pencil size={20} />
+                    </button>
+                    <button onClick={() => handleDeleteModule(mod._id)}>
+                      <Trash2 size={20} className="text-red-600" />
+                    </button>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600">{mod.description}</p>
-                <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
-                  {/* <span>&#9658; {mod.type}</span> */}
-                  <span>&#8226;</span>
-                  <span>{mod.duration}</span>
-                </div>
+
+                {/* DESCRIPTION */}
+                {moduleEditing.moduleId === mod._id && moduleEditing.field === "description" ? (
+                  <div className="flex gap-2">
+                    <input
+                      value={fieldValue}
+                      onChange={(e) => setFieldValue(e.target.value)}
+                      className="border px-2 py-1 w-full rounded"
+                    />
+                    <button onClick={() => handleModuleFieldSave(mod._id)}>
+                      <Save size={20} className="text-green-600" />
+                    </button>
+                    <button onClick={() => setModuleEditing({})}>
+                      <X size={20} />
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-600">
+                    <strong>Description:</strong> {mod.description}
+                    <button
+                      onClick={() => handleModuleFieldEdit(mod._id, "description", mod.description)}
+                      className="ml-2"
+                    >
+                      <Pencil size={14} className="inline text-blue-500" />
+                    </button>
+                  </p>
+                )}
+
+                {/* FILES */}
+                {/* FILES */}
+<div>
+  <div className="flex justify-between items-center">
+    <strong>Files:</strong>
+    <button onClick={() => setFileUploadModuleId(mod._id)}>
+      <Pencil size={16} className="text-blue-600" />
+    </button>
+  </div>
+  {fileUploadModuleId === mod._id ? (
+    <div className="flex gap-2 mt-2">
+      <input
+        type="file"
+        multiple
+        onChange={(e) => handleFilesUpload(mod._id, Array.from(e.target.files))}
+      />
+      <button onClick={() => setFileUploadModuleId(null)}>
+        <X size={18} />
+      </button>
+    </div>
+  ) : mod.files?.length ? (
+    <ul className="list-disc pl-5 text-blue-600 text-sm">
+      {mod.files.map((f, i) => (
+        <li key={i}>
+          <a href={f} target="_blank" rel="noreferrer" className="underline">
+            {decodeURIComponent(f.split("/").pop())}
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p className="text-sm italic text-gray-500">No files uploaded</p>
+  )}
+</div>
+
+{/* VIDEOS */}
+<div>
+  <div className="flex justify-between items-center">
+    <strong>Videos:</strong>
+    <button onClick={() => setVideoEditingModuleId(mod._id)}>
+      <Pencil size={16} className="text-blue-600" />
+    </button>
+  </div>
+  {videoEditingModuleId === mod._id ? (
+    <div className="flex gap-2 mt-2">
+      <input
+        type="text"
+        className="border px-2 py-1 w-full rounded"
+        placeholder="Paste video URL"
+        value={newVideos}
+        onChange={(e) => setNewVideos(e.target.value)}
+      />
+      <button onClick={() => handleAddVideoLink(mod._id)}>
+        <Save size={18} className="text-green-600" />
+      </button>
+      <button onClick={() => setVideoEditingModuleId(null)}>
+        <X size={18} />
+      </button>
+    </div>
+  ) : mod.Videos?.length ? (
+    <ul className="list-disc pl-5 text-green-700 text-sm">
+      {mod.Videos.map((v, i) => (
+        <li key={i}>
+          <a href={v} target="_blank" rel="noreferrer" className="underline">
+            {decodeURIComponent(v.split("/").pop())}
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p className="text-sm italic text-gray-500">No videos</p>
+  )}
+</div>
+
               </div>
             </div>
-            <button className="border border-green-500 text-green-600 px-4 py-1 rounded hover:bg-green-50" onClick={()=>{localStorage.setItem("courseDetails",JSON.stringify(mod));window.location.href="/app/single-course"}} >
-              Review
-            </button>
-
           </div>
         ))}
       </div>
