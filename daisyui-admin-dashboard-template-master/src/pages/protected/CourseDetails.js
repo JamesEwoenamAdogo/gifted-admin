@@ -131,7 +131,7 @@ const handleAddVideoLink = async (moduleId) => {
   };
 
   const handleAddNew = () => {
-    navigate("/app/add-course-module");
+    navigate("/app/add-module",{state:courseId});
   };
 
   const handleDeleteModule = async (moduleId) => {
