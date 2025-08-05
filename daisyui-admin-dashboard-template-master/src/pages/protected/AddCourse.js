@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function CreateCoursePage() {
   const [courseInfo, setCourseInfo] = useState({
     title: "",
-    grade: "",
+    grade: [],
     description: "",
     category: "",
     duration: "",
@@ -15,13 +15,18 @@ export default function CreateCoursePage() {
   });
 
   const [modules, setModules] = useState([]);
+  const [ categories,setCategories]= useState([])
+  const [programs,setPrograms]= useState([])
 
-  const programs = ["STEM Program", "Arts Program", "Leadership Program", "Entrepreneurship Program"];
-
-  const handleAddModule = () => {
-    setModules([
-      ...modules,
-      {
+  // const programs = ["STEM Program", "Arts Program", "Leadership Program", "Entrepreneurship Program"];
+    // const programs = ["STEM Program", "Arts Program", "Leadership Program", "Entrepreneurship Program"];
+    // const categories = ["Science", "Math", "Arts", "Technology", "Language", "Business"];
+    const gradesList = Array.from({ length: 12 }, (_, i) => `Grade ${i + 1}`);
+    
+    const handleAddModule = () => {
+      setModules([
+        ...modules,
+        {
         title: "",
         description: "",
         duration: "",
@@ -34,18 +39,32 @@ export default function CreateCoursePage() {
       },
     ]);
   };
+  
+ const handleCourseChange = (e) => {
+  const { name, value, type, checked, files } = e.target;
 
-  const handleCourseChange = (e) => {
-    const { name, value, type, checked, files } = e.target;
-    if (name === "thumbnail") {
-      setCourseInfo({ ...courseInfo, thumbnail: files[0] });
+  if (name === "thumbnail") {
+    setCourseInfo({ ...courseInfo, thumbnail: files[0] });
+
+  } else if (name === "grade") {
+    let updatedGrades = [...courseInfo.grade];
+
+    if (checked) {
+      updatedGrades.push(value);
     } else {
-      setCourseInfo({
-        ...courseInfo,
-        [name]: type === "checkbox" ? checked : value,
-      });
+      updatedGrades = updatedGrades.filter((g) => g !== value);
     }
-  };
+
+    setCourseInfo({ ...courseInfo, grade: updatedGrades });
+
+  } else {
+    setCourseInfo({
+      ...courseInfo,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  }
+};
+
 
   const handleModuleChange = (index, field, value) => {
     const updated = [...modules];
@@ -64,28 +83,29 @@ export default function CreateCoursePage() {
     updated[index].videoLinks[vIndex] = value;
     setModules(updated);
   };
-
+  
   const addVideoField = (index) => {
     const updated = [...modules];
     updated[index].videoLinks.push("");
     setModules(updated);
   };
-
+  
   const handleSubmitCourseInfo = async () => {
     try {
-      const formData = new FormData();
+      const formData = new FormData()
       formData.append("title", courseInfo.title);
-      formData.append("grade", courseInfo.grade);
+      formData.append("grade", JSON.stringify(courseInfo.grade));
       formData.append("description", courseInfo.description);
       formData.append("category", courseInfo.category);
       formData.append("duration", courseInfo.duration);
-      formData.append("level", courseInfo.level);
-      formData.append("featured", courseInfo.featured);
+      // formData.append("level", courseInfo.level);
+      formData.append("publish", courseInfo.featured);
       formData.append("program", courseInfo.program);
+      formData.append("cost", courseInfo.cost);
       if (courseInfo.thumbnail) {
         formData.append("thumbnail", courseInfo.thumbnail);
       }
-
+      
       const response = await axios.post("/upload-course-info", formData);
       if (response.data.success) {
         alert("Course info submitted successfully!");
@@ -98,7 +118,27 @@ export default function CreateCoursePage() {
       alert("Error submitting course info");
     }
   };
-
+  useEffect(()=>{
+    const loadCategories= async()=>{
+      const response = await axios.get("/all-interest")
+      
+      console.log(response)
+      const interest = response.data.allInterest.map((item)=>item.name)
+      setCategories(interest)
+    }
+    loadCategories()
+  },[])
+  useEffect(()=>{
+    const loadPrograms = async()=>{
+      const response = await axios.get("/all-competitions")
+      
+      console.log(response)
+      const competition = response.data.AllCompetitions.map((item)=>item.name)
+      setPrograms(competition)
+    }
+    loadPrograms()
+  },[])
+  
   const handleSubmitModule = async (index) => {
     const courseId = localStorage.getItem("courseId");
     if (!courseId) {
@@ -152,10 +192,25 @@ export default function CreateCoursePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input name="title" placeholder="Course Title" className="border rounded p-2" value={courseInfo.title} onChange={handleCourseChange} />
-        <input name="grade" placeholder="Grade" className="border rounded p-2" value={courseInfo.grade} onChange={handleCourseChange} />
-        <input name="category" placeholder="Category" className="border rounded p-2" value={courseInfo.category} onChange={handleCourseChange} />
+        {/* <input name="grade" placeholder="Grade" className="border rounded p-2" value={courseInfo.grade} onChange={handleCourseChange} /> */}
+        {/* <input name="category" placeholder="Category" className="border rounded p-2" value={courseInfo.category} onChange={handleCourseChange} /> */}
+        {/* Cost Input */}
+        <input name="cost" placeholder="Cost (e.g., 200)" type="number" className="border rounded p-2" value={courseInfo.cost} onChange={handleCourseChange} />
+
+        {/* Category Dropdown */}
+        <select name="category" className="border rounded p-2" value={courseInfo.category} onChange={handleCourseChange}>
+          <option value="">Select Category</option>
+          {categories.map((cat, idx) => (
+            <option key={idx} value={cat}>{cat}</option>
+          ))}
+        </select>
+
+
+
+
+
         <input name="duration" placeholder="Duration (e.g., 6 weeks)" className="border rounded p-2" value={courseInfo.duration} onChange={handleCourseChange} />
-        <input name="level" placeholder="Level (e.g., Beginner)" className="border rounded p-2" value={courseInfo.level} onChange={handleCourseChange} />
+        {/* <input name="level" placeholder="Level (e.g., Beginner)" className="border rounded p-2" value={courseInfo.level} onChange={handleCourseChange} /> */}
         <label className="flex items-center gap-2">
           <input type="checkbox" name="featured" checked={courseInfo.featured} onChange={handleCourseChange} />
           Featured
@@ -166,6 +221,25 @@ export default function CreateCoursePage() {
             <option key={idx} value={prog}>{prog}</option>
           ))}
         </select>
+
+        <div className="col-span-1 md:col-span-2">
+          <label className="block font-medium mb-1">Grade Levels</label>
+          <div className="grid grid-cols-3 gap-2">
+            {gradesList.map((grade) => (
+              <label key={grade} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="grade"
+                  value={grade}
+                  checked={courseInfo.grade.includes(grade)}
+                  onChange={handleCourseChange}
+                />
+                {grade}
+              </label>
+            ))}
+          </div>
+        </div>
+
         <textarea name="description" placeholder="Course Description" className="border rounded p-2 col-span-1 md:col-span-2" rows={4} value={courseInfo.description} onChange={handleCourseChange} />
         <div className="col-span-1 md:col-span-2">
           <label className="block mb-1">Course Thumbnail</label>
