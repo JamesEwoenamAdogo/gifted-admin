@@ -12,6 +12,7 @@ export default function CreateCoursePage() {
     featured: false,
     thumbnail: null,
     program: "",
+    cost:""
   });
 
   const [modules, setModules] = useState([]);
@@ -21,7 +22,7 @@ export default function CreateCoursePage() {
   // const programs = ["STEM Program", "Arts Program", "Leadership Program", "Entrepreneurship Program"];
     // const programs = ["STEM Program", "Arts Program", "Leadership Program", "Entrepreneurship Program"];
     // const categories = ["Science", "Math", "Arts", "Technology", "Language", "Business"];
-    const gradesList = Array.from({ length: 12 }, (_, i) => `Grade ${i + 1}`);
+    const gradesList = Array.from({ length: 12 }, (_, i) => `${i + 1}`);
     
     const handleAddModule = () => {
       setModules([
