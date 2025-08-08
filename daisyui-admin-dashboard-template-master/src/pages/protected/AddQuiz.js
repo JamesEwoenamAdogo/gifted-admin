@@ -19,7 +19,12 @@ export default function CreateQuiz() {
   const [allowReview, setAllowReview] = useState(false);
   const [displayScores, setDisplayScores] = useState(false);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
-
+  const [instructor,setInstructor] = useState("")
+  const [level,setLevel]= useState("")
+  const [courseInfo, setCourseInfo]= useState({
+    tags:[],
+    features:[]
+  })
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -36,6 +41,13 @@ export default function CreateQuiz() {
     formData.append("displayScores", displayScores);
     formData.append("showFeedBackForm", showFeedbackForm);
     formData.append("questions", JSON.stringify(questions));
+    formData.append("type","assessment")
+    formData.append("level",level)
+    formData.append("instructor",instructor)
+    formData.append("tags",courseInfo.tags)
+    formData.append("features",courseInfo.features)
+
+    
 
     questions.forEach((q) => {
       if (q.image) {
@@ -96,6 +108,38 @@ export default function CreateQuiz() {
     updatedQuestions[qIndex].explanation = value;
     setQuestions(updatedQuestions);
   };
+   const addTag = () => {
+    setCourseInfo((prev) => ({ ...prev, tags: [...prev.tags, ""] }));
+  };
+  const updateTag = (index, value) => {
+    setCourseInfo((prev) => {
+      const t = [...prev.tags];
+      t[index] = value;
+      return { ...prev, tags: t };
+    });
+  };
+  const removeTag = (index) => {
+    setCourseInfo((prev) => {
+      const t = prev.tags.filter((_, i) => i !== index);
+      return { ...prev, tags: t };
+    });
+  };
+  const addFeature = () => {
+    setCourseInfo((prev) => ({ ...prev, features: [...prev.features, ""] }));
+  };
+  const updateFeature = (index, value) => {
+    setCourseInfo((prev) => {
+      const f = [...prev.features];
+      f[index] = value;
+      return { ...prev, features: f };
+    });
+  };
+  const removeFeature = (index) => {
+    setCourseInfo((prev) => {
+      const f = prev.features.filter((_, i) => i !== index);
+      return { ...prev, features: f };
+    });
+  };
 
   useEffect(() => {
     console.log(
@@ -136,6 +180,18 @@ export default function CreateQuiz() {
         type="text"
         className="w-full p-2 border rounded mb-4"
         onChange={(e) => setTitle(e.target.value)}
+      />
+      <label className="block mb-2">Instructor</label>
+      <input
+        type="text"
+        className="w-full p-2 border rounded mb-4"
+        onChange={(e) => setInstructor(e.target.value)}
+      />
+      <label className="block mb-2">Level</label>
+      <input
+        type="text"
+        className="w-full p-2 border rounded mb-4"
+        onChange={(e) => setLevel(e.target.value)}
       />
 
       <label className="block mb-2">Description</label>
@@ -227,9 +283,67 @@ export default function CreateQuiz() {
         />
         <span>Show Feedback Form After Quiz</span>
       </label>
+       {/* Tags input */}
+      <div className="space-y-2">
+        <label className="font-medium">Tags</label>
+        {courseInfo.tags.map((tag, idx) => (
+          <div key={idx} className="flex gap-2 items-center">
+            <input
+              type="text"
+              placeholder="Tag"
+              className="border rounded p-2 flex-1"
+              value={tag}
+              onChange={(e) => updateTag(idx, e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => removeTag(idx)}
+              className="px-3 py-1 bg-red-100 text-red-600 rounded"
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addTag}
+          className="mt-1 ml-1 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+        >
+          + Add Tag
+        </button>
+      </div>
+       {/* Features input */}
+      <div className="space-y-2">
+        <label className="font-medium">Features</label>
+        {courseInfo.features.map((feat, idx) => (
+          <div key={idx} className="flex gap-2 items-center">
+            <input
+              type="text"
+              placeholder="Feature"
+              className="border rounded p-2 flex-1"
+              value={feat}
+              onChange={(e) => updateFeature(idx, e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => removeFeature(idx)}
+              className="px-3 py-1 bg-red-100 text-red-600 rounded"
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addFeature}
+          className="mt-1 ml-1 mb-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+        >
+          + Add Feature
+        </button>
+      </div>
 
       {questions.map((q, qIndex) => (
-        <div key={qIndex} className="border p-4 rounded mb-4">
+        <div key={qIndex} className="border p-4 rounded mb-4 mt-4">
           <label className="block mb-2">Question</label>
           <ReactQuill
             theme="snow"

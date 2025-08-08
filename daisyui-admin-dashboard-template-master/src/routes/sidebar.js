@@ -58,6 +58,14 @@ const routes = [
     path:"/app/feedback",
     name:"Feedback"
   },
+  {
+    path:"/app/flashcard",
+    name:"FlashCard"
+  },
+  {
+    path:"/app/timed-challenge",
+    name:"Timed Challenge"
+  },
  
   {
     path: '/app/addOns', // url

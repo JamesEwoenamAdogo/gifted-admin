@@ -44,6 +44,10 @@ const AllCommunities = lazy(() => import('../pages/protected/AllCommunities'))
 const GroupDetails = lazy(() => import('../pages/protected/GroupDetails'))
 const Feedback = lazy(() => import('../pages/protected/Feedback'))
 const AddCourseModule = lazy(() => import('../pages/protected/AddCourseModule'))
+const TimedChallenge = lazy(() => import('../pages/protected/TimedChallenge'))
+const FlashCard = lazy(() => import('../pages/protected/FlashCard'))
+const AddFlashCard = lazy(() => import('../pages/protected/AddFlashCard'))
+const AddTimedChallenge = lazy(() => import('../pages/protected/AddTimedChallenge'))
 
 
 
@@ -83,6 +87,22 @@ const routes = [
   {
     path: '/assessment-management',
     component: AssessmentManagement,
+  },
+  {
+    path: '/timed-challenge',
+    component: TimedChallenge,
+  },
+  {
+    path: '/flashcard',
+    component: FlashCard,
+  },
+  {
+    path: '/add-timed-challenge',
+    component: AddTimedChallenge,
+  },
+  {
+    path: '/add-flashcard',
+    component: AddFlashCard,
   },
   {
     path:'/edit-competition',

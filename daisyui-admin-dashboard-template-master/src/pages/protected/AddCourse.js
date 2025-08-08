@@ -12,7 +12,12 @@ export default function CreateCoursePage() {
     featured: false,
     thumbnail: null,
     program: "",
-    cost:""
+    cost:"",
+    instructor:"",
+    tags:[],
+    features:[],
+    type:"Learning",
+
   });
 
   const [modules, setModules] = useState([]);
@@ -90,6 +95,40 @@ export default function CreateCoursePage() {
     updated[index].videoLinks.push("");
     setModules(updated);
   };
+   const addTag = () => {
+    setCourseInfo((prev) => ({ ...prev, tags: [...prev.tags, ""] }));
+  };
+  const updateTag = (index, value) => {
+    setCourseInfo((prev) => {
+      const t = [...prev.tags];
+      t[index] = value;
+      return { ...prev, tags: t };
+    });
+  };
+  const removeTag = (index) => {
+    setCourseInfo((prev) => {
+      const t = prev.tags.filter((_, i) => i !== index);
+      return { ...prev, tags: t };
+    });
+  };
+
+  // Feature handlers
+  const addFeature = () => {
+    setCourseInfo((prev) => ({ ...prev, features: [...prev.features, ""] }));
+  };
+  const updateFeature = (index, value) => {
+    setCourseInfo((prev) => {
+      const f = [...prev.features];
+      f[index] = value;
+      return { ...prev, features: f };
+    });
+  };
+  const removeFeature = (index) => {
+    setCourseInfo((prev) => {
+      const f = prev.features.filter((_, i) => i !== index);
+      return { ...prev, features: f };
+    });
+  };
   
   const handleSubmitCourseInfo = async () => {
     try {
@@ -99,10 +138,15 @@ export default function CreateCoursePage() {
       formData.append("description", courseInfo.description);
       formData.append("category", courseInfo.category);
       formData.append("duration", courseInfo.duration);
-      // formData.append("level", courseInfo.level);
+      formData.append("level", courseInfo.level);
       formData.append("publish", courseInfo.featured);
+      formData.append("instructor",courseInfo.instructor);
+      formData.append("tags",JSON.stringify(courseInfo.tags))
+      formData.append("features",JSON.stringify(courseInfo.features))
+
       formData.append("program", courseInfo.program);
       formData.append("cost", courseInfo.cost);
+      
       if (courseInfo.thumbnail) {
         formData.append("thumbnail", courseInfo.thumbnail);
       }
@@ -179,7 +223,9 @@ export default function CreateCoursePage() {
       alert(`Error submitting module ${index + 1}`);
     }
   };
+  
 
+  
   const handleSubmit = () => {
 
     console.log("Course Info:", courseInfo);
@@ -193,7 +239,7 @@ export default function CreateCoursePage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input name="title" placeholder="Course Title" className="border rounded p-2" value={courseInfo.title} onChange={handleCourseChange} />
-        {/* <input name="grade" placeholder="Grade" className="border rounded p-2" value={courseInfo.grade} onChange={handleCourseChange} /> */}
+        <input name="instructor" placeholder="instructor" className="border rounded p-2" value={courseInfo.instructor} onChange={handleCourseChange} />
         {/* <input name="category" placeholder="Category" className="border rounded p-2" value={courseInfo.category} onChange={handleCourseChange} /> */}
         {/* Cost Input */}
         <input name="cost" placeholder="Cost (e.g., 200)" type="number" className="border rounded p-2" value={courseInfo.cost} onChange={handleCourseChange} />
@@ -211,7 +257,7 @@ export default function CreateCoursePage() {
 
 
         <input name="duration" placeholder="Duration (e.g., 6 weeks)" className="border rounded p-2" value={courseInfo.duration} onChange={handleCourseChange} />
-        {/* <input name="level" placeholder="Level (e.g., Beginner)" className="border rounded p-2" value={courseInfo.level} onChange={handleCourseChange} /> */}
+        <input name="level" placeholder="Level (e.g., Beginner)" className="border rounded p-2" value={courseInfo.level} onChange={handleCourseChange} />
         <label className="flex items-center gap-2">
           <input type="checkbox" name="featured" checked={courseInfo.featured} onChange={handleCourseChange} />
           Featured
@@ -240,12 +286,73 @@ export default function CreateCoursePage() {
             ))}
           </div>
         </div>
+         {/* Tags input */}
+      <div className="space-y-2">
+        <label className="font-medium">Tags</label>
+        {courseInfo.tags.map((tag, idx) => (
+          <div key={idx} className="flex gap-2 items-center">
+            <input
+              type="text"
+              placeholder="Tag"
+              className="border rounded p-2 flex-1"
+              value={tag}
+              onChange={(e) => updateTag(idx, e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => removeTag(idx)}
+              className="px-3 py-1 bg-red-100 text-red-600 rounded"
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addTag}
+          className="mt-1 ml-1 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+        >
+          + Add Tag
+        </button>
+      </div>
+       {/* Features input */}
+      <div className="space-y-2">
+        <label className="font-medium">Features</label>
+        {courseInfo.features.map((feat, idx) => (
+          <div key={idx} className="flex gap-2 items-center">
+            <input
+              type="text"
+              placeholder="Feature"
+              className="border rounded p-2 flex-1"
+              value={feat}
+              onChange={(e) => updateFeature(idx, e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => removeFeature(idx)}
+              className="px-3 py-1 bg-red-100 text-red-600 rounded"
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={addFeature}
+          className="mt-1 ml-1 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+        >
+          + Add Feature
+        </button>
+      </div>
+
+        
 
         <textarea name="description" placeholder="Course Description" className="border rounded p-2 col-span-1 md:col-span-2" rows={4} value={courseInfo.description} onChange={handleCourseChange} />
         <div className="col-span-1 md:col-span-2">
           <label className="block mb-1">Course Thumbnail</label>
           <input type="file" name="thumbnail" accept="image/*" className="border rounded p-2 w-full" onChange={handleCourseChange} />
         </div>
+        
       </div>
 
       <div>
