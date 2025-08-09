@@ -48,6 +48,8 @@ const TimedChallenge = lazy(() => import('../pages/protected/TimedChallenge'))
 const FlashCard = lazy(() => import('../pages/protected/FlashCard'))
 const AddFlashCard = lazy(() => import('../pages/protected/AddFlashCard'))
 const AddTimedChallenge = lazy(() => import('../pages/protected/AddTimedChallenge'))
+const AllFlashCards = lazy(() => import('../pages/protected/AllFlashCards'))
+const AllTimedChallenge = lazy(() => import('../pages/protected/AllTimedChallenge'))
 
 
 
@@ -103,6 +105,14 @@ const routes = [
   {
     path: '/add-flashcard',
     component: AddFlashCard,
+  },
+  {
+    path: '/all-flashcard',
+    component: AllFlashCards,
+  },
+  {
+    path: '/all-timed-challenge',
+    component: AllTimedChallenge,
   },
   {
     path:'/edit-competition',

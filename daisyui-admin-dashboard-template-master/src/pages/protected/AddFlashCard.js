@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function AddFlashcardPage() {
   const [flashcard, setFlashcard] = useState({
@@ -17,30 +20,44 @@ export default function AddFlashcardPage() {
     setFlashcard((prev) => ({ ...prev, [name]: value }));
   };
 
-  const saveFlashcard = () => {
-    console.log("Flashcard Added:", flashcard);
-    setFlashcardsList((prev) => [...prev, flashcard]);
-    setFlashcard({ question: "", answer: "", difficulty: "Easy" });
+  const saveFlashcard = async () => {
+    try {
+      const response = await axios.post("/add-flashcard", {
+        ...flashcard,
+        courseId: localStorage.getItem("courseId"),
+      });
+      console.log(response)
+
+      if (response.data.succes) {
+        toast.success("✅ Flashcard saved successfully!", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+        setFlashcard({ question: "", answer: "", difficulty: "Easy" });
+      } else {
+        toast.error("❌ Failed to save flashcard", {
+          position: "top-right",
+          autoClose: 2000,
+        });
+      }
+    } catch (error) {
+      toast.error("⚠️ Something went wrong!", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+      console.error(error);
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Save the current flashcard to the list
-    saveFlashcard();
-
-    // Here, you can send the list to your backend
-    console.log("Final Flashcards List:", [...flashcardsList, flashcard]);
-
-    // Optional: send to backend
-    // await axios.post('/bulk-flashcards', [...flashcardsList, flashcard]);
-
-    alert("Flashcards saved successfully!");
+    await saveFlashcard();
     navigate("/flashcards");
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <ToastContainer />
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -48,7 +65,7 @@ export default function AddFlashcardPage() {
         className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-lg"
       >
         <h2 className="text-2xl font-bold mb-6 text-center text-[#003366]">
-          Add New Flashcard
+          {`Add New Flashcard to  ${localStorage.getItem("courseName")}`}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -110,14 +127,6 @@ export default function AddFlashcardPage() {
               className="w-1/2 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg transition"
             >
               Save & Add Another
-            </motion.button>
-
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              className="w-1/2 bg-[#003366] hover:bg-[#002244] text-white font-semibold py-2 px-4 rounded-lg transition"
-            >
-              Save All & Finish
             </motion.button>
           </div>
         </form>

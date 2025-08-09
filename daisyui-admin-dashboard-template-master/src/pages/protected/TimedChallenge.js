@@ -32,13 +32,14 @@ export default function ItemList() {
   };
 
   const handleAddTimedChallenge = (item) => {
-    localStorage.setItem("courseInfo", JSON.stringify(item));
+    localStorage.setItem("courseId",item._id);
+    localStorage.setItem("courseName",item.title)
     window.location.href = "/app/add-timed-challenge";
   };
 
   const handleViewTimedChallenges = (item) => {
-    localStorage.setItem("courseInfo", JSON.stringify(item));
-    window.location.href = "/app/all-timed-challenges";
+    localStorage.setItem("courseId",item._id);
+    window.location.href = "/app/all-timed-challenge";
   };
 
   const filteredItems = items.filter((item) => {
@@ -93,12 +94,12 @@ export default function ItemList() {
                   {Array.isArray(item.program) ? item.program.join(", ") : item.program}
                 </p>
               </div>
-              <button
+              {/* <button
                 className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                 onClick={() => handleViewDetails(item)}
               >
                 Show Details
-              </button>
+              </button> */}
             </div>
 
             <div className="flex gap-2 mt-2">

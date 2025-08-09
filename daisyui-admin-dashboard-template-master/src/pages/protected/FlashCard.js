@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
+
 export default function ItemList() {
   const [items, setItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,12 +28,13 @@ export default function ItemList() {
   }, []);
 
   const handleViewFlashcards = (course) => {
-    localStorage.setItem("courseInfo", JSON.stringify(course));
-    window.location.href = "/app/view-flashcards"; // Change this route if needed
+    localStorage.setItem("courseId", course._id);
+    window.location.href = "/app/all-flashcard"; // Change this route if needed
   };
 
   const handleAddFlashcard = (course) => {
-    localStorage.setItem("courseInfo", JSON.stringify(course));
+    localStorage.setItem("courseId",course._id);
+    localStorage.setItem("courseName",course.title);
     window.location.href = "/app/add-flashcard";
   };
 

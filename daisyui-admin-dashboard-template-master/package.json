@@ -52,7 +52,7 @@
     "react-router-dom": "^6.26.2",
     "react-scripts": "5.0.1",
     "react-tailwindcss-datepicker": "^1.6.0",
-    "react-toastify": "^11.0.3",
+    "react-toastify": "^11.0.5",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "theme-change": "^2.2.0",
