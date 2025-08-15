@@ -139,7 +139,7 @@ export default function CreateCoursePage() {
       formData.append("category", courseInfo.category);
       formData.append("duration", courseInfo.duration);
       formData.append("level", courseInfo.level);
-      formData.append("publish", courseInfo.featured);
+      formData.append("featured", courseInfo.featured);
       formData.append("instructor",courseInfo.instructor);
       formData.append("tags",JSON.stringify(courseInfo.tags))
       formData.append("features",JSON.stringify(courseInfo.features))

@@ -19,6 +19,7 @@ export default function CreateQuiz() {
   const [allowReview, setAllowReview] = useState(false);
   const [displayScores, setDisplayScores] = useState(false);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [shuffleQuestions, setShuffleQuestions] = useState(false);
   const [instructor,setInstructor] = useState("")
   const [level,setLevel]= useState("")
   const [courseInfo, setCourseInfo]= useState({
@@ -40,6 +41,7 @@ export default function CreateQuiz() {
     formData.append("allowQuizReview", allowReview);
     formData.append("displayScores", displayScores);
     formData.append("showFeedBackForm", showFeedbackForm);
+    formData.append("shuffleQuestions", shuffleQuestions);
     formData.append("questions", JSON.stringify(questions));
     formData.append("type","assessment")
     formData.append("level",level)
@@ -154,6 +156,7 @@ export default function CreateQuiz() {
       allowReview,
       displayScores,
       showFeedbackForm,
+      shuffleQuestions,
       questions
     );
   }, [
@@ -168,6 +171,7 @@ export default function CreateQuiz() {
     allowReview,
     displayScores,
     showFeedbackForm,
+    shuffleQuestions,
     questions,
   ]);
 
@@ -282,6 +286,15 @@ export default function CreateQuiz() {
           onChange={(e) => setShowFeedbackForm(e.target.checked)}
         />
         <span>Show Feedback Form After Quiz</span>
+      </label>
+      
+      <label className="flex items-center space-x-2 mb-4">
+        <input
+          type="checkbox"
+          checked={shuffleQuestions}
+          onChange={(e) => setShuffleQuestions(e.target.checked)}
+        />
+        <span>Shuffle Questions</span>
       </label>
        {/* Tags input */}
       <div className="space-y-2">
