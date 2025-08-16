@@ -130,6 +130,15 @@ const handleAddVideoLink = async (moduleId) => {
     }
   };
 
+  const handleToggleCourseBoolean = async (field, newValue) => {
+    try {
+      await axios.put(`/update-course-info/${courseId}`, { [field]: newValue });
+      setCourseInfo((prev) => ({ ...prev, [field]: newValue }));
+    } catch (error) {
+      console.error(`Failed to toggle ${field}:`, error);
+    }
+  };
+
   const handleAddNew = () => {
     navigate("/app/add-module",{state:courseId});
   };
@@ -185,13 +194,23 @@ const handleAddVideoLink = async (moduleId) => {
           "category",
           "program",
           "featured",
+          "publish",
           "thumbnail",
         ].map((field) => (
           <div key={field} className="flex flex-col">
             <label className="text-sm font-medium text-gray-600 capitalize">
               {field}
             </label>
-            {editingField === field ? (
+            {(["featured", "publish"].includes(field) || typeof courseInfo[field] === "boolean") ? (
+              <div className="flex items-center gap-2 mt-1">
+                <input
+                  type="checkbox"
+                  checked={Boolean(courseInfo[field])}
+                  onChange={(e) => handleToggleCourseBoolean(field, e.target.checked)}
+                />
+                <span className="text-sm text-gray-800">{Boolean(courseInfo[field]) ? "On" : "Off"}</span>
+              </div>
+            ) : editingField === field ? (
               <div className="flex items-center gap-2 mt-1">
                 {field === "thumbnail" ? (
                   <>

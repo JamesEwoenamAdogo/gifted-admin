@@ -14,6 +14,7 @@ export default function AddCourseModule() {
 
   const [files, setFiles] = useState([]);
   const [videos, setVideos] = useState([""]);
+  const [resources, setResources] = useState([""]);
   const [image, setImage] = useState(null);
 
   const handleVideoChange = (index, value) => {
@@ -24,6 +25,16 @@ export default function AddCourseModule() {
 
   const handleAddVideoField = () => {
     setVideos([...videos, ""]);
+  };
+
+  const handleResourceChange = (index, value) => {
+    const updatedResources = [...resources];
+    updatedResources[index] = value;
+    setResources(updatedResources);
+  };
+
+  const handleAddResourceField = () => {
+    setResources([...resources, ""]);
   };
 
   const handleSubmit = async (e) => {
@@ -40,6 +51,10 @@ export default function AddCourseModule() {
         formData.append("description", description);
         formData.append("duration", duration);
         formData.append("Videos", JSON.stringify(videos));
+        formData.append(
+          "resources",
+          JSON.stringify(resources.filter((r) => r.trim() !== ""))
+        );
 
 
         const res = await axios.post(`/upload-course-details/${courseId}`, formData);
@@ -55,13 +70,28 @@ export default function AddCourseModule() {
         formData.append("description", description);
         formData.append("duration", duration);
         formData.append("Videos", JSON.stringify(videos));
+        formData.append(
+          "Resources",
+          JSON.stringify(resources.filter((r) => r.trim() !== ""))
+        );
 
 
         const res = await axios.post(`/upload-course-details/${courseId}`, formData);
         uploadedImage = res.data.url;
       }
 
-      if (uploadType === "video") {
+      if (uploadType === "resources") {
+        await axios.post(`/upload-course-details/${courseId}`, {
+          courseId,
+          title,
+          description,
+          duration,
+          files: [],
+          Videos: [],
+          image: "",
+          resources: JSON.stringify(resources.filter((r) => r.trim() !== "")),
+        });
+      } else if (uploadType === "video") {
         await axios.post(`/upload-course-details/${courseId}`, {
           courseId,
           title,
@@ -70,6 +100,7 @@ export default function AddCourseModule() {
           files: [],
           Videos: JSON.stringify(videos.filter((v) => v.trim() !== "")),
           image: "",
+          resources: JSON.stringify(resources.filter((r) => r.trim() !== "")),
         });
       } else {
         await axios.post(`/upload-course-details/${courseId}`, {
@@ -80,6 +111,7 @@ export default function AddCourseModule() {
           files: uploadedFiles,
           Videos: [],
           image: uploadedImage,
+          resources: JSON.stringify(resources.filter((r) => r.trim() !== "")),
         });
       }
 
@@ -130,7 +162,7 @@ export default function AddCourseModule() {
         <div>
           <label className="block font-medium mb-2">Upload Type</label>
           <div className="flex gap-4">
-            {["file", "video", "image"].map((type) => (
+            {["file", "video", "image", "resources"].map((type) => (
               <label key={type} className="flex items-center gap-2">
                 <input
                   type="radio"
@@ -187,6 +219,29 @@ export default function AddCourseModule() {
               accept="image/*"
               onChange={(e) => setImage(e.target.files[0])}
             />
+          </div>
+        )}
+
+        {uploadType === "resources" && (
+          <div>
+            <label className="block font-medium mb-2">Resource URLs</label>
+            {resources.map((url, index) => (
+              <input
+                key={index}
+                type="text"
+                placeholder={`Resource URL ${index + 1}`}
+                className="border px-3 py-2 w-full mb-2 rounded"
+                value={url}
+                onChange={(e) => handleResourceChange(index, e.target.value)}
+              />
+            ))}
+            <button
+              type="button"
+              onClick={handleAddResourceField}
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Add another resource
+            </button>
           </div>
         )}
 

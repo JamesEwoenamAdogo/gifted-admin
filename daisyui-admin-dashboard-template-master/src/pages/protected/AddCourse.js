@@ -39,9 +39,11 @@ export default function CreateCoursePage() {
         includeImage: false,
         includePdf: false,
         includeVideo: false,
+        includeResource: false,
         images: [],
         pdfs: [],
         videoLinks: [""],
+        resourceLinks: [""],
       },
     ]);
   };
@@ -93,6 +95,16 @@ export default function CreateCoursePage() {
   const addVideoField = (index) => {
     const updated = [...modules];
     updated[index].videoLinks.push("");
+    setModules(updated);
+  };
+  const handleResourceLinkChange = (index, rIndex, value) => {
+    const updated = [...modules];
+    updated[index].resourceLinks[rIndex] = value;
+    setModules(updated);
+  };
+  const addResourceField = (index) => {
+    const updated = [...modules];
+    updated[index].resourceLinks.push("");
     setModules(updated);
   };
    const addTag = () => {
@@ -198,6 +210,7 @@ export default function CreateCoursePage() {
     formData.append("duration", module.duration);
 
     formData.append("Videos", JSON.stringify(module.videoLinks));
+    formData.append("Resources", JSON.stringify(module.resourceLinks));
 
     if (module.includeImage && module.images.length > 0) {
       module.images.forEach((file) => {
@@ -386,6 +399,10 @@ export default function CreateCoursePage() {
                 <input type="checkbox" checked={mod.includeVideo} onChange={(e) => handleModuleChange(idx, "includeVideo", e.target.checked)} />
                 Include Videos
               </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={mod.includeResource} onChange={(e) => handleModuleChange(idx, "includeResource", e.target.checked)} />
+                Include Additional Resources
+              </label>
             </div>
 
             {mod.includeImage && (
@@ -400,6 +417,14 @@ export default function CreateCoursePage() {
                   <input key={vIndex} type="text" placeholder="Video URL" className="border p-2 rounded w-full" value={link} onChange={(e) => handleVideoLinkChange(idx, vIndex, e.target.value)} />
                 ))}
                 <button onClick={() => addVideoField(idx)} className="text-blue-600 hover:underline text-sm">+ Add another video link</button>
+              </div>
+            )}
+            {mod.includeResource && (
+              <div className="space-y-2">
+                {mod.resourceLinks.map((link, rIndex) => (
+                  <input key={rIndex} type="text" placeholder="Resource URL" className="border p-2 rounded w-full" value={link} onChange={(e) => handleResourceLinkChange(idx, rIndex, e.target.value)} />
+                ))}
+                <button onClick={() => addResourceField(idx)} className="text-blue-600 hover:underline text-sm">+ Add another resource link</button>
               </div>
             )}
 
