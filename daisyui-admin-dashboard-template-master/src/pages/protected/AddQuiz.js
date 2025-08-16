@@ -1,9 +1,199 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import 'katex/dist/katex.min.css';
+import katex from 'katex';
 
+if (typeof window !== 'undefined') {
+  // Make KaTeX available to Quill's formula module
+  // Quill expects window.katex to render formulas
+  // eslint-disable-next-line no-undef
+  window.katex = katex;
+}
+
+// Reusable rich text editor with HTML toggle and counters
+function RichTextEditor({ value, onChange, placeholder, modules, formats }) {
+  const [isHtmlMode, setIsHtmlMode] = useState(false);
+  const editorRef = useRef(null);
+
+  const stripHtml = (html) => {
+    const div = document.createElement('div');
+    div.innerHTML = html || '';
+    return (div.textContent || div.innerText || '').replace(/\s+/g, ' ').trim();
+  };
+
+  const textOnly = stripHtml(value || '');
+  const charCount = textOnly.length;
+  const wordCount = textOnly.length === 0 ? 0 : textOnly.split(' ').length;
+
+  const insertAtCursor = (text) => {
+    if (isHtmlMode) {
+      const next = (value || '') + text;
+      onChange(next);
+      return;
+    }
+    const quill = editorRef?.current?.getEditor?.();
+    if (!quill) return;
+    const selection = quill.getSelection(true);
+    const index = selection ? selection.index : quill.getLength();
+    quill.insertText(index, text, 'user');
+    quill.setSelection(index + text.length, 0, 'user');
+  };
+
+  const insertFormula = (latex) => {
+    if (isHtmlMode) {
+      const safeLatex = (latex || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+      const span = `<span class="ql-formula" data-value="${safeLatex}"></span>`;
+      onChange((value || '') + span);
+      return;
+    }
+    const quill = editorRef?.current?.getEditor?.();
+    if (!quill) return;
+    const selection = quill.getSelection(true);
+    const index = selection ? selection.index : quill.getLength();
+    quill.insertEmbed(index, 'formula', latex, 'user');
+    quill.setSelection(index + 1, 0, 'user');
+  };
+
+  const mathSymbols = [
+    { label: 'α', latex: '\\alpha' },
+    { label: 'β', latex: '\\beta' },
+    { label: 'γ', latex: '\\gamma' },
+    { label: 'Δ', latex: '\\Delta' },
+    { label: 'θ', latex: '\\theta' },
+    { label: 'λ', latex: '\\lambda' },
+    { label: 'π', latex: '\\pi' },
+    { label: 'Σ', latex: '\\sum' },
+    { label: '∫', latex: '\\int' },
+    { label: '∞', latex: '\\infty' },
+    { label: '√', latex: '\\sqrt{}' },
+    { label: '≈', latex: '\\approx' },
+    { label: '≠', latex: '\\neq' },
+    { label: '≤', latex: '\\leq' },
+    { label: '≥', latex: '\\geq' },
+    { label: '⋅', latex: '\\cdot' },
+    { label: '×', latex: '\\times' },
+    { label: '÷', latex: '\\div' },
+    { label: '±', latex: '\\pm' },
+    { label: '∂', latex: '\\partial' },
+    { label: '∇', latex: '\\nabla' },
+    { label: '∈', latex: '\\in' },
+    { label: '∉', latex: '\\notin' },
+    { label: '∪', latex: '\\cup' },
+    { label: '∩', latex: '\\cap' },
+    { label: '⊂', latex: '\\subset' },
+    { label: '⊆', latex: '\\subseteq' },
+    { label: '⊇', latex: '\\supseteq' },
+  ];
+
+  const templates = [
+    { label: 'Fraction', latex: '\\frac{a}{b}' },
+    { label: 'Power', latex: 'x^{n}' },
+    { label: 'Subscript', latex: 'x_{i}' },
+    { label: 'Limit', latex: '\\lim_{x \\to 0} f(x)' },
+    { label: 'Sum', latex: '\\sum_{i=1}^{n} x_i' },
+    { label: 'Integral', latex: '\\int_{a}^{b} f(x) \\mathrm{d}x' },
+    { label: 'Matrix 2x2', latex: '\\begin{bmatrix} a & b \\ \\ c & d \\end{bmatrix}' },
+    { label: 'Vector', latex: '\\vec{x}' },
+    { label: 'Casework', latex: '\\begin{cases} a, & x>0 \\ \\ b, & x\\le 0 \\end{cases}' },
+  ];
+
+  return (
+    <div className="border rounded">
+      <div className="flex items-center justify-between px-2 py-1 border-b bg-gray-50">
+        <div className="text-xs text-gray-600">
+          <span className="mr-3">Words: <span className="font-semibold">{wordCount}</span></span>
+          <span>Chars: <span className="font-semibold">{charCount}</span></span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-600">Mode:</span>
+          <button
+            type="button"
+            className={`text-xs px-2 py-1 rounded ${!isHtmlMode ? 'bg-blue-600 text-white' : 'bg-white border'}`}
+            onClick={() => setIsHtmlMode(false)}
+          >
+            Rich
+          </button>
+          <button
+            type="button"
+            className={`text-xs px-2 py-1 rounded ${isHtmlMode ? 'bg-blue-600 text-white' : 'bg-white border'}`}
+            onClick={() => setIsHtmlMode(true)}
+          >
+            HTML
+          </button>
+        </div>
+      </div>
+
+      {/* Math palette */}
+      <div className="flex flex-wrap gap-1 px-2 py-2 border-b bg-white">
+        {mathSymbols.map((s, i) => (
+          <button
+            key={i}
+            type="button"
+            className="text-sm px-2 py-1 border rounded hover:bg-gray-50"
+            title={s.latex}
+            onClick={() => insertFormula(s.latex)}
+          >
+            {s.label}
+          </button>
+        ))}
+        <div className="ml-auto flex items-center gap-2">
+          {templates.map((t, i) => (
+            <button
+              key={i}
+              type="button"
+              className="text-xs px-2 py-1 border rounded hover:bg-gray-50"
+              title={t.latex}
+              onClick={() => insertFormula(t.latex)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="p-0">
+        {isHtmlMode ? (
+          <textarea
+            className="w-full p-2 min-h-[120px] outline-none"
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+          />
+        ) : (
+          <ReactQuill
+            ref={editorRef}
+            theme="snow"
+            value={value}
+            onChange={(html) => onChange(html)}
+            modules={modules}
+            formats={formats}
+            placeholder={placeholder}
+          />
+        )}
+      </div>
+
+      {/* Quick text symbols for plain insertion (non-formula) */}
+      <div className="flex flex-wrap gap-1 px-2 py-2 border-t bg-gray-50">
+        {['≤','≥','≠','≈','±','·','→','↔','∴','∵'].map((sym, i) => (
+          <button
+            key={i}
+            type="button"
+            className="text-xs px-2 py-1 border rounded hover:bg-gray-100"
+            onClick={() => insertAtCursor(sym)}
+          >
+            {sym}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function CreateQuiz() {
   const [questions, setQuestions] = useState([]);
@@ -174,6 +364,45 @@ export default function CreateQuiz() {
     shuffleQuestions,
     questions,
   ]);
+
+  // Advanced editor configuration for questions and answers
+  const quillModules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      [{ font: [] }],
+      [{ size: ['small', false, 'large', 'huge'] }],
+      ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
+      [{ script: 'sub' }, { script: 'super' }],
+      [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+      [{ color: [] }, { background: [] }],
+      [{ align: [] }],
+      ['link', 'formula'],
+      ['clean'],
+    ],
+  };
+
+  const quillFormats = [
+    'header',
+    'font',
+    'size',
+    'bold',
+    'italic',
+    'underline',
+    'strike',
+    'blockquote',
+    'code-block',
+    'script',
+    'list',
+    'bullet',
+    'indent',
+    'color',
+    'background',
+    'align',
+    'link',
+    // 'image',
+    // 'video',
+    'formula',
+  ];
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
@@ -358,33 +587,15 @@ export default function CreateQuiz() {
       {questions.map((q, qIndex) => (
         <div key={qIndex} className="border p-4 rounded mb-4 mt-4">
           <label className="block mb-2">Question</label>
-          <ReactQuill
-            theme="snow"
+          <RichTextEditor
             value={q.question}
             onChange={(value) => updateQuestion(qIndex, value)}
-            className="mb-4"
-            modules={{
-              toolbar: [
-                ['bold', 'italic', 'underline'],
-                [{ script: 'sub' }, { script: 'super' }], // Subscript & Superscript
-                [{ list: 'ordered' }, { list: 'bullet' }],
-                ['clean'],
-                ['formula'],
-
-              ],
-            }}
-            formats={[
-              'bold',
-              'italic',
-              'underline',
-              'script',
-              'list',
-              'bullet',
-              'formula'
-            ]}
+            modules={quillModules}
+            formats={quillFormats}
+            placeholder="Type the question here... You can use headings, colors, lists, formulas, images, videos, and code."
           />
 
-          <label className="block mb-2">Question Image</label>
+          <label className="block mb-2 mt-4">Question Image</label>
           <input
             type="file"
             className="w-full p-2 border rounded mb-4"
@@ -395,31 +606,15 @@ export default function CreateQuiz() {
   <div key={aIndex} className="mb-4">
     <div className="flex items-start gap-2">
       <div className="w-full">
-        <ReactQuill
-          theme="snow"
+        <RichTextEditor
           value={a}
           onChange={(value) => updateAnswer(qIndex, aIndex, value)}
-          modules={{
-            toolbar: [
-              ['bold', 'italic', 'underline'],
-              [{ script: 'sub' }, { script: 'super' }],
-              [{ list: 'ordered' }, { list: 'bullet' }],
-              ['clean'],
-              ['formula'],
-            ],
-          }}
-          formats={[
-            'bold',
-            'italic',
-            'underline',
-            'script',
-            'list',
-            'bullet',
-            'formula',
-          ]}
+          modules={quillModules}
+          formats={quillFormats}
+          placeholder={`Answer option ${aIndex + 1}... (rich formatting supported)`}
         />
       </div>
-      <div className="mt-2">
+      <div className="mt-2 ml-2">
         <input
           type="checkbox"
           checked={q.correctAnswer === a}
