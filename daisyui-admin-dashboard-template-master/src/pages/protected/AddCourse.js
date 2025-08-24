@@ -6,12 +6,12 @@ export default function CreateCoursePage() {
     title: "",
     grade: [],
     description: "",
-    category: "",
+    category: [], // Changed from string to array
     duration: "",
     level: "",
     featured: false,
     thumbnail: null,
-    program: "",
+    program: [], // Changed from string to array
     cost:"",
     instructor:"",
     tags:[],
@@ -64,6 +64,28 @@ export default function CreateCoursePage() {
     }
 
     setCourseInfo({ ...courseInfo, grade: updatedGrades });
+
+  } else if (name === "category") {
+    let updatedCategories = [...courseInfo.category];
+
+    if (checked) {
+      updatedCategories.push(value);
+    } else {
+      updatedCategories = updatedCategories.filter((c) => c !== value);
+    }
+
+    setCourseInfo({ ...courseInfo, category: updatedCategories });
+
+  } else if (name === "program") {
+    let updatedPrograms = [...courseInfo.program];
+
+    if (checked) {
+      updatedPrograms.push(value);
+    } else {
+      updatedPrograms = updatedPrograms.filter((p) => p !== value);
+    }
+
+    setCourseInfo({ ...courseInfo, program: updatedPrograms });
 
   } else {
     setCourseInfo({
@@ -148,7 +170,7 @@ export default function CreateCoursePage() {
       formData.append("title", courseInfo.title);
       formData.append("grade", JSON.stringify(courseInfo.grade));
       formData.append("description", courseInfo.description);
-      formData.append("category", courseInfo.category);
+      formData.append("category", JSON.stringify(courseInfo.category)); // Convert array to JSON string
       formData.append("duration", courseInfo.duration);
       formData.append("level", courseInfo.level);
       formData.append("featured", courseInfo.featured);
@@ -156,12 +178,16 @@ export default function CreateCoursePage() {
       formData.append("tags",JSON.stringify(courseInfo.tags))
       formData.append("features",JSON.stringify(courseInfo.features))
 
-      formData.append("program", courseInfo.program);
+      formData.append("program", JSON.stringify(courseInfo.program)); // Convert array to JSON string
       formData.append("cost", courseInfo.cost);
+
+      console.log(courseInfo.category)
+      console.log(courseInfo.program)
       
       if (courseInfo.thumbnail) {
         formData.append("thumbnail", courseInfo.thumbnail);
       }
+      
       
       const response = await axios.post("/upload-course-info", formData);
       if (response.data.success) {
@@ -257,30 +283,51 @@ export default function CreateCoursePage() {
         {/* Cost Input */}
         <input name="cost" placeholder="Cost (e.g., 200)" type="number" className="border rounded p-2" value={courseInfo.cost} onChange={handleCourseChange} />
 
-        {/* Category Dropdown */}
-        <select name="category" className="border rounded p-2" value={courseInfo.category} onChange={handleCourseChange}>
-          <option value="">Select Category</option>
-          {categories.map((cat, idx) => (
-            <option key={idx} value={cat}>{cat}</option>
-          ))}
-        </select>
-
-
-
+        {/* Category Checkboxes */}
+        <div className="col-span-1 md:col-span-2">
+          <label className="block font-medium mb-1">Categories</label>
+          <div className="grid grid-cols-3 gap-2">
+            {categories.map((cat, idx) => (
+              <label key={idx} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="category"
+                  value={cat}
+                  checked={courseInfo.category.includes(cat)}
+                  onChange={handleCourseChange}
+                />
+                {cat}
+              </label>
+            ))}
+          </div>
+        </div>
 
 
         <input name="duration" placeholder="Duration (e.g., 6 weeks)" className="border rounded p-2" value={courseInfo.duration} onChange={handleCourseChange} />
         <input name="level" placeholder="Level (e.g., Beginner)" className="border rounded p-2" value={courseInfo.level} onChange={handleCourseChange} />
         <label className="flex items-center gap-2">
           <input type="checkbox" name="featured" checked={courseInfo.featured} onChange={handleCourseChange} />
-          Featured
+          Publish
         </label>
-        <select name="program" className="border rounded p-2" value={courseInfo.program} onChange={handleCourseChange}>
-          <option value="">Select Program</option>
-          {programs.map((prog, idx) => (
-            <option key={idx} value={prog}>{prog}</option>
-          ))}
-        </select>
+        
+        {/* Program Checkboxes */}
+        <div className="col-span-1 md:col-span-2">
+          <label className="block font-medium mb-1">Programs</label>
+          <div className="grid grid-cols-3 gap-2">
+            {programs.map((prog, idx) => (
+              <label key={idx} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="program"
+                  value={prog}
+                  checked={courseInfo.program.includes(prog)}
+                  onChange={handleCourseChange}
+                />
+                {prog}
+              </label>
+            ))}
+          </div>
+        </div>
 
         <div className="col-span-1 md:col-span-2">
           <label className="block font-medium mb-1">Grade Levels</label>

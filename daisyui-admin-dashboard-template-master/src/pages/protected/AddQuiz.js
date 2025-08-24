@@ -201,7 +201,10 @@ export default function CreateQuiz() {
   const [description, setDescription] = useState("");
   const [time, setTime] = useState(0);
   const [numberOfQuestions, setNumberOfQuestions] = useState("");
-  const [grade, setGrade] = useState("");
+  const [grade, setGrade] = useState([]);
+  const [programs, setPrograms] = useState([]);
+  const [allCompetitions, setAllCompetitions] = useState([]);
+  const [programsOpen, setProgramsOpen] = useState(false);
   const [image, setImage] = useState({});
   const [isFeatured, setIsFeatured] = useState(false);
   const [isPublished, setIsPublished] = useState(false);
@@ -216,6 +219,42 @@ export default function CreateQuiz() {
     tags:[],
     features:[]
   })
+
+  // Fetch all competitions for program selection
+  useEffect(() => {
+    const fetchCompetitions = async () => {
+      try {
+        const response = await axios.get("/all-competitions");
+        setAllCompetitions(response.data.AllCompetitions || []);
+      } catch (error) {
+        console.error("Error fetching competitions:", error);
+      }
+    };
+    fetchCompetitions();
+  }, []);
+
+  // Handle grade checkbox changes
+  const handleGradeChange = (gradeNumber) => {
+    setGrade(prev => {
+      if (prev.includes(gradeNumber)) {
+        return prev.filter(g => g !== gradeNumber);
+      } else {
+        return [...prev, gradeNumber];
+      }
+    });
+  };
+
+  // Handle program checkbox changes
+  const handleProgramChange = (program) => {
+    setPrograms(prev => {
+      if (prev.includes(program)) {
+        return prev.filter(p => p !== program);
+      } else {
+        return [...prev, program];
+      }
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
@@ -223,7 +262,8 @@ export default function CreateQuiz() {
     formData.append("description", description);
     formData.append("time", time);
     formData.append("numberOfQuestions", numberOfQuestions);
-    formData.append("grade", grade);
+    formData.append("grade", JSON.stringify(grade));
+    formData.append("programs", JSON.stringify(programs));
     formData.append("image", image);
     formData.append("featured", isFeatured);
     formData.append("publish", isPublished);
@@ -236,8 +276,8 @@ export default function CreateQuiz() {
     formData.append("type","assessment")
     formData.append("level",level)
     formData.append("instructor",instructor)
-    formData.append("tags",courseInfo.tags)
-    formData.append("features",courseInfo.features)
+    formData.append("tags",JSON.stringify(courseInfo.tags))
+    formData.append("features",JSON.stringify(courseInfo.features))
 
     
 
@@ -340,6 +380,7 @@ export default function CreateQuiz() {
       time,
       numberOfQuestions,
       grade,
+      programs,
       isFeatured,
       isPublished,
       attemptsAllowed,
@@ -355,14 +396,15 @@ export default function CreateQuiz() {
     time,
     numberOfQuestions,
     grade,
+    programs,
     isFeatured,
     isPublished,
     attemptsAllowed,
-    allowReview,
-    displayScores,
-    showFeedbackForm,
-    shuffleQuestions,
-    questions,
+      allowReview,
+      displayScores,
+      showFeedbackForm,
+      shuffleQuestions,
+      questions,
   ]);
 
   // Advanced editor configuration for questions and answers
@@ -457,13 +499,58 @@ export default function CreateQuiz() {
       />
 
       <label className="block mb-2">Grade</label>
-      <input
-        type="text"
-        className="w-full p-2 border rounded mb-4"
-        onChange={(e) => setGrade(e.target.value)}
-      />
+      <div className="flex flex-wrap gap-2 mb-4">
+        {Array.from({ length: 12 }, (_, i) => i + 1).map((g) => (
+          <label key={g} className="flex items-center">
+            <input
+              type="checkbox"
+              value={g}
+              checked={grade.includes(g)}
+              onChange={() => handleGradeChange(g)}
+              className="mr-1"
+            />
+            Grade {g}
+          </label>
+        ))}
+      </div>
 
-      <label className="flex items-center space-x-2 mb-4">
+             <label className="block mb-2">Program</label>
+       <div className="relative mb-6">
+         <button
+           type="button"
+           onClick={() => setProgramsOpen(!programsOpen)}
+           className="w-full p-2 border rounded bg-white text-left flex items-center justify-between"
+         >
+           <span>
+             {programs.length === 0 
+               ? "Select programs..." 
+               : `${programs.length} program${programs.length !== 1 ? 's' : ''} selected`
+             }
+           </span>
+           <svg className={`w-4 h-4 transition-transform ${programsOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+           </svg>
+         </button>
+         
+         {programsOpen && (
+           <div className="absolute z-10 w-full mt-1 bg-white border rounded shadow-lg max-h-60 overflow-y-auto">
+             {allCompetitions.map((program) => (
+               <label key={program.id} className="flex items-center p-2 hover:bg-gray-50 cursor-pointer">
+                 <input
+                   type="checkbox"
+                   value={program.name}
+                   checked={programs.includes(program.name)}
+                   onChange={() => handleProgramChange(program.name)}
+                   className="mr-2"
+                 />
+                 <span className="text-sm">{program.name}</span>
+               </label>
+             ))}
+           </div>
+         )}
+       </div>
+
+       <label className="flex items-center space-x-2 mb-4">
         <input
           type="checkbox"
           checked={isFeatured}
