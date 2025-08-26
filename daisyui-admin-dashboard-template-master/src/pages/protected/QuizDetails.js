@@ -6,6 +6,7 @@ const QuizDetails = () => {
   const [editingField, setEditingField] = useState(null);
   const [formData, setFormData] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
+  const [imageRemoved, setImageRemoved] = useState(false);
   const [newQuestion, setNewQuestion] = useState(false);
 
   useEffect(() => {
@@ -21,6 +22,7 @@ const QuizDetails = () => {
       const index = parseInt(field.split("-")[1]);
       setFormData({ ...details.questions[index], index });
       setImagePreview(details.questions[index]?.image || null);
+      setImageRemoved(false);
     } else {
       setFormData({ [field]: details[field] });
       if (field === 'image') {
@@ -51,7 +53,14 @@ const QuizDetails = () => {
     if (file) {
       setFormData({ ...formData, image: file });
       setImagePreview(URL.createObjectURL(file));
+      setImageRemoved(false);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setFormData({ ...formData, image: null });
+    setImagePreview(null);
+    setImageRemoved(true);
   };
 
   const handleSave = async () => {
@@ -59,32 +68,56 @@ const QuizDetails = () => {
 
     if (editingField.startsWith("question-")) {
       const index = formData.index;
-      const form = new FormData();
-
-      form.append("question", formData.question);
-      form.append("explanation", formData.explanation);
-      form.append("correctAnswer", formData.correctAnswer);
-      formData.answers.forEach((ans, i) => {
-        form.append(`answers[${i}]`, ans);
-      });
-      if (formData.image instanceof File) {
-        form.append("image", formData.image);
-      }
-
-      try {
-        await axios.put(
-          `/update-question/${localStorage.getItem("id")}/${index}`,
-          form,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data"
+      // If image was explicitly removed, send JSON with image: null
+      if (imageRemoved) {
+        const payload = {
+          question: formData.question,
+          explanation: formData.explanation,
+          correctAnswer: formData.correctAnswer,
+          answers: formData.answers,
+          image: null
+        };
+        try {
+          await axios.put(
+            `/update-question/${localStorage.getItem("id")}/${index}`,
+            JSON.stringify(payload),
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
             }
-          }
-        );
-        setEditingField(null);
-      } catch (error) {
-        console.error("Question update failed:", error);
+          );
+          setEditingField(null);
+        } catch (error) {
+          console.error("Question update failed:", error);
+        }
+      } else {
+        const form = new FormData();
+        form.append("question", formData.question);
+        form.append("explanation", formData.explanation);
+        form.append("correctAnswer", formData.correctAnswer);
+        formData.answers.forEach((ans, i) => {
+          form.append(`answers[${i}]`, ans);
+        });
+        if (formData.image instanceof File) {
+          form.append("image", formData.image);
+        }
+        try {
+          await axios.put(
+            `/update-question/${localStorage.getItem("id")}/${index}`,
+            form,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data"
+              }
+            }
+          );
+          setEditingField(null);
+        } catch (error) {
+          console.error("Question update failed:", error);
+        }
       }
 
     } else {
@@ -295,6 +328,18 @@ const QuizDetails = () => {
                   <label className="block mb-1">Question Image:</label>
                   <input type="file" accept="image/*" onChange={handleImageChange} />
                   {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 w-64 h-auto" />}
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      Remove Image
+                    </button>
+                    {imageRemoved && (
+                      <span className="text-xs text-red-600 self-center">Image will be removed</span>
+                    )}
+                  </div>
                 </div>
               </div>
             ) : (
