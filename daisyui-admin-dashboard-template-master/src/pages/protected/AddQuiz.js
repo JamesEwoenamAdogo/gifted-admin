@@ -305,6 +305,7 @@ export default function CreateQuiz() {
         answers: ["", "", "", ""],
         correctAnswer: null,
         image: null,
+        hasImage: false,
         explanation: "",
       },
     ]);
@@ -331,7 +332,8 @@ export default function CreateQuiz() {
 
   const updateQuestionImage = (qIndex, file) => {
     const updatedQuestions = [...questions];
-    updatedQuestions[qIndex].image = file;
+    updatedQuestions[qIndex].image = file || null;
+    updatedQuestions[qIndex].hasImage = !!file;
     setQuestions(updatedQuestions);
   };
 
