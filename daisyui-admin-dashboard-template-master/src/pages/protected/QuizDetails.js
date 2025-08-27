@@ -7,7 +7,14 @@ const QuizDetails = () => {
   const [formData, setFormData] = useState({});
   const [imagePreview, setImagePreview] = useState(null);
   const [imageRemoved, setImageRemoved] = useState(false);
-  const [newQuestion, setNewQuestion] = useState(false);
+  const [newQuestion, setNewQuestion] = useState({
+    question: "",
+    answers: ["", "", "", ""],
+    correctAnswer: "",
+    image: null,
+    explanation: ""
+  });
+  const [showNewQuestionForm, setShowNewQuestionForm] = useState(false);
 
   useEffect(() => {
     const loadQuizDetails = async () => {
@@ -46,6 +53,30 @@ const QuizDetails = () => {
   const handleCorrectAnswerChange = (index) => {
     const correctValue = formData.answers[index];
     setFormData({ ...formData, correctAnswer: correctValue });
+  };
+
+  const handleNewQuestionChange = (e) => {
+    const { name, value } = e.target;
+    setNewQuestion({ ...newQuestion, [name]: value });
+  };
+
+  const handleNewAnswerChange = (index, value) => {
+    const updatedAnswers = [...newQuestion.answers];
+    updatedAnswers[index] = value;
+    setNewQuestion({ ...newQuestion, answers: updatedAnswers });
+  };
+
+  const handleNewCorrectAnswerChange = (index) => {
+    const correctValue = newQuestion.answers[index];
+    setNewQuestion({ ...newQuestion, correctAnswer: correctValue });
+  };
+
+  const handleNewImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewQuestion({ ...newQuestion, image: file });
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const handleImageChange = (e) => {
@@ -160,24 +191,74 @@ const QuizDetails = () => {
   );
 
   const handleAddQuestion = async () => {
-    if (!newQuestion) {
-      const question = {
+    if (!showNewQuestionForm) {
+      setShowNewQuestionForm(true);
+      return;
+    }
+
+    // Validate that question has content
+    if (!newQuestion.question.trim()) {
+      alert("Please enter a question");
+      return;
+    }
+
+    // Validate that at least one answer is provided
+    if (!newQuestion.answers.some(answer => answer.trim())) {
+      alert("Please provide at least one answer");
+      return;
+    }
+
+    // Validate that correct answer is selected
+    if (!newQuestion.correctAnswer) {
+      alert("Please select a correct answer");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("question", newQuestion.question);
+      formData.append("explanation", newQuestion.explanation);
+      formData.append("correctAnswer", newQuestion.correctAnswer);
+      newQuestion.answers.forEach((ans, i) => {
+        formData.append(`answers[${i}]`, ans);
+      });
+      if (newQuestion.image instanceof File) {
+        formData.append("image", newQuestion.image);
+      }
+      
+
+      const response = await axios.put(
+        `/add-question/${localStorage.getItem("id")}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data"
+          }
+        }
+      );
+
+      console.log("Question added successfully:", response);
+      
+      // Reset form and hide it
+      setNewQuestion({
         question: "",
         answers: ["", "", "", ""],
-        correctAnswer: null,
+        correctAnswer: "",
         image: null,
         explanation: ""
-      };
-      const updatedQuestions = [...(details.questions || []), question];
-      setDetails((prevDetails) => ({
-        ...prevDetails,
-        numberOfQuestions: updatedQuestions.length,
-        questions: updatedQuestions
-      }));
-    }
-    if (newQuestion["question"]) {
-      const response = await axios.put(`/add-question/${localStorage.getItem("id")}`, newQuestion);
-      console.log(response);
+      });
+      setShowNewQuestionForm(false);
+      setImagePreview(null);
+      
+      // Reload quiz details to show the new question
+      const quizResponse = await axios.get(`/all-exams/${localStorage.getItem("id")}`);
+      setDetails({ ...quizResponse.data.exam });
+      
+    } catch (error) {
+      console.error("Failed to add question:", error);
+      alert("Failed to add question. Please try again.");
     }
   };
 
@@ -259,9 +340,86 @@ const QuizDetails = () => {
           onClick={handleAddQuestion}
           className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
         >
-          Add Question
+          {showNewQuestionForm ? "Save Question" : "Add Question"}
         </button>
       </div>
+
+      {/* New Question Form */}
+      {showNewQuestionForm && (
+        <div className="border p-4 rounded-lg mb-4 bg-gray-50">
+          <h3 className="text-lg font-semibold mb-4">Add New Question</h3>
+          <div className="space-y-4">
+            <input
+              name="question"
+              value={newQuestion.question}
+              onChange={handleNewQuestionChange}
+              placeholder="Enter your question"
+              className="w-full p-2 border rounded"
+            />
+            
+            <div className="space-y-2">
+              <label className="block font-medium">Answers:</label>
+              {newQuestion.answers.map((ans, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    value={ans}
+                    onChange={(e) => handleNewAnswerChange(i, e.target.value)}
+                    className="flex-1 p-2 border rounded"
+                    placeholder={`Answer ${i + 1}`}
+                  />
+                  <input
+                    type="checkbox"
+                    checked={newQuestion.correctAnswer === ans}
+                    onChange={() => handleNewCorrectAnswerChange(i)}
+                  />
+                  <span className="text-sm text-gray-600">Correct</span>
+                </div>
+              ))}
+            </div>
+
+            <textarea
+              name="explanation"
+              value={newQuestion.explanation}
+              onChange={handleNewQuestionChange}
+              placeholder="Explanation (optional)"
+              className="w-full p-2 border rounded"
+              rows="3"
+            />
+
+            <div>
+              <label className="block font-medium mb-2">Question Image (optional):</label>
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleNewImageChange}
+                className="w-full p-2 border rounded"
+              />
+              {imagePreview && (
+                <img src={imagePreview} alt="Preview" className="mt-2 w-48 h-auto rounded" />
+              )}
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  setShowNewQuestionForm(false);
+                  setNewQuestion({
+                    question: "",
+                    answers: ["", "", "", ""],
+                    correctAnswer: "",
+                    image: null,
+                    explanation: ""
+                  });
+                  setImagePreview(null);
+                }}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {editingField && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
