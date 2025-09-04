@@ -41,6 +41,9 @@ export default function AddCourseModule() {
     e.preventDefault();
 
     try {
+      const cleanedVideos = videos.filter((v) => v && v.trim() !== "");
+      const videosJson = JSON.stringify(cleanedVideos);
+      const resourcesJson = JSON.stringify(resources.filter((r) => r.trim() !== ""));
       let uploadedFiles = [];
       let uploadedImage = "";
 
@@ -50,11 +53,8 @@ export default function AddCourseModule() {
         formData.append("title", title);
         formData.append("description", description);
         formData.append("duration", duration);
-        formData.append("Videos", JSON.stringify(videos));
-        formData.append(
-          "resources",
-          JSON.stringify(resources.filter((r) => r.trim() !== ""))
-        );
+        formData.append("Videos", videosJson);
+        formData.append("resources", resourcesJson);
 
 
         const res = await axios.post(`/upload-course-details/${courseId}`, formData);
@@ -69,11 +69,8 @@ export default function AddCourseModule() {
         formData.append("title", title);
         formData.append("description", description);
         formData.append("duration", duration);
-        formData.append("Videos", JSON.stringify(videos));
-        formData.append(
-          "Resources",
-          JSON.stringify(resources.filter((r) => r.trim() !== ""))
-        );
+        formData.append("Videos", videosJson);
+        formData.append("Resources", resourcesJson);
 
 
         const res = await axios.post(`/upload-course-details/${courseId}`, formData);
@@ -87,9 +84,9 @@ export default function AddCourseModule() {
           description,
           duration,
           files: [],
-          Videos: [],
+          Videos: videosJson,
           image: "",
-          resources: JSON.stringify(resources.filter((r) => r.trim() !== "")),
+          resources: resourcesJson,
         });
       } else if (uploadType === "video") {
         await axios.post(`/upload-course-details/${courseId}`, {
@@ -98,9 +95,9 @@ export default function AddCourseModule() {
           description,
           duration,
           files: [],
-          Videos: JSON.stringify(videos.filter((v) => v.trim() !== "")),
+          Videos: videosJson,
           image: "",
-          resources: JSON.stringify(resources.filter((r) => r.trim() !== "")),
+          resources: resourcesJson,
         });
       } else {
         await axios.post(`/upload-course-details/${courseId}`, {
@@ -109,9 +106,9 @@ export default function AddCourseModule() {
           description,
           duration,
           files: uploadedFiles,
-          Videos: [],
+          Videos: videosJson,
           image: uploadedImage,
-          resources: JSON.stringify(resources.filter((r) => r.trim() !== "")),
+          resources: resourcesJson,
         });
       }
 

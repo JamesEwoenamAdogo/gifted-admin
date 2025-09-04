@@ -351,6 +351,40 @@ const handleAddVideoLink = async (moduleId) => {
                   </p>
                 )}
 
+                {/* IMAGE (optional) */}
+                {mod.image && (
+                  <div className="mt-2">
+                    <strong>Image:</strong>
+                    <div className="mt-1">
+                      <img
+                        src={mod.image}
+                        alt={`${mod.title || "Module"} image`}
+                        className="w-40 h-28 object-cover rounded border"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* ADDITIONAL RESOURCES (optional) */}
+                {Array.isArray(mod.additionalResources) && mod.additionalResources.length > 0 && (
+                  <div className="mt-2">
+                    <strong>Additional Resources:</strong>
+                    <ul className="list-disc pl-5 text-blue-700 text-sm mt-1">
+                      {mod.additionalResources.map((res, idx) => (
+                        <li key={idx}>
+                          {res?.url ? (
+                            <a href={res.url} target="_blank" rel="noreferrer" className="underline">
+                              {res.title || res.url}
+                            </a>
+                          ) : (
+                            <span>{res?.title || String(res)}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 {/* FILES */}
                 {/* FILES */}
 <div>

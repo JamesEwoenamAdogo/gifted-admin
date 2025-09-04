@@ -262,6 +262,7 @@ export default function CreateQuiz() {
     formData.append("description", description);
     formData.append("time", time);
     formData.append("numberOfQuestions", numberOfQuestions);
+    // Send grade as a JSON string for backends that JSON.parse this field
     formData.append("grade", JSON.stringify(grade));
     formData.append("programs", JSON.stringify(programs));
     formData.append("image", image);
