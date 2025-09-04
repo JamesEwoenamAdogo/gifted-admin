@@ -10,7 +10,7 @@ export default function ItemList() {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const response = await axios.get("/all-courses-info");
+        const response = await axios.get("/all-courses-admin-info");
         const courses = response.data.courses || [];
         setItems(courses);
 
