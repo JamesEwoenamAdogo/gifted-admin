@@ -25,6 +25,7 @@ function AddLeadModalBody({ closeModal, competitionToEdit }) {
 
     const typeOptions = ["Mathematics", "Science", "English", "ICT", "Geography"];
     const [type, setType] = useState([]);
+    const [grades, setGrades] = useState([]);
 
     const currentYear = new Date().getFullYear();
     const years = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
@@ -43,6 +44,7 @@ function AddLeadModalBody({ closeModal, competitionToEdit }) {
                 customizableButton: competitionToEdit.customizableButton || ""
             });
             setType(competitionToEdit.type || []);
+            setGrades(competitionToEdit.grades || []);
             setSelectedYear(competitionToEdit.year || currentYear);
         }
     }, [competitionToEdit]);
@@ -66,6 +68,7 @@ function AddLeadModalBody({ closeModal, competitionToEdit }) {
         const newLeadObj = {
             ...leadObj,
             type,
+            grade:grades,
             year: selectedYear,
             registered: competitionToEdit?.registered || [],
             paid: competitionToEdit?.paid || [],
@@ -212,6 +215,31 @@ function AddLeadModalBody({ closeModal, competitionToEdit }) {
                             </label>
                         ))}
                     </div>
+
+                    <details className="mb-4">
+                        <summary className="cursor-pointer font-semibold">Select Grades</summary>
+                        <div className="mt-2 grid grid-cols-3 gap-y-2">
+                            {Array.from({ length: 12 }, (_, i) => i + 1).map((grade) => (
+                                <label key={grade} className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        value={grade}
+                                        checked={grades.includes(grade)}
+                                        onChange={(e) => {
+                                            const g = Number(e.target.value);
+                                            setGrades((prev) =>
+                                                prev.includes(g)
+                                                    ? prev.filter((n) => n !== g)
+                                                    : [...prev, g]
+                                            );
+                                        }}
+                                        className="mr-2"
+                                    />
+                                    {grade}
+                                </label>
+                            ))}
+                        </div>
+                    </details>
                 </>
             )}
 
