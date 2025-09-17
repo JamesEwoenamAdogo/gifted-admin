@@ -14,8 +14,10 @@ export default function EditCompetition() {
     assessmentCost: 0,
     Description: "",
     customizableButton: "",
-    link: ""
+    link: "",
+    grade: []
   });
+  const [isEditingGrades, setIsEditingGrades] = useState(false);
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("editCompetition"));
@@ -23,7 +25,13 @@ export default function EditCompetition() {
       alert("No competition data found!");
       // return navigate("/app/edit-competio");
     }
-    setCompetition(data);
+    setCompetition({
+      grade: [],
+      ...data,
+      grade: Array.isArray(data?.grade)
+        ? data.grade.map((g) => String(g))
+        : []
+    });
   }, []);
 
   const handleChange = (e) => {
@@ -39,12 +47,27 @@ export default function EditCompetition() {
     try {
       await axios.put(`/update-competition/${competition._id}`, competition);
       alert("Competition updated successfully");
-      navigate("/app/leads");
+      navigate("/app/competitions");
     } catch (err) {
       console.error(err);
       alert("Failed to update competition");
     }
   };
+
+  const handleGradeToggle = (e) => {
+    const selectedGrade = String(e.target.value);
+    const isChecked = e.target.checked;
+    setCompetition((prev) => {
+      const current = Array.isArray(prev.grade) ? prev.grade.map((g) => String(g)) : [];
+      if (isChecked) {
+        if (current.includes(selectedGrade)) return prev;
+        return { ...prev, grade: [...current, selectedGrade].sort((a, b) => Number(a) - Number(b)) };
+      }
+      return { ...prev, grade: current.filter((g) => String(g) !== selectedGrade) };
+    });
+  };
+
+  const gradeOptions = Array.from({ length: 12 }, (_, i) => String(i + 1));
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
@@ -137,6 +160,35 @@ export default function EditCompetition() {
           placeholder="Assessment Cost"
           className="input input-bordered w-full"
         />
+       <div>
+         <label><h1 className="font-semibold">Grades</h1></label>
+         <div className="flex items-center justify-between">
+           <div className="text-sm">
+             {competition.grade && competition.grade.length > 0 ? competition.grade.join(", ") : "None selected"}
+           </div>
+           <button type="button" className="btn btn-outline btn-sm" onClick={() => setIsEditingGrades((v) => !v)}>
+             {isEditingGrades ? "Done" : "Edit Grades"}
+           </button>
+         </div>
+         {isEditingGrades && (
+           <div className="mt-2 p-3 border rounded-lg max-h-56 overflow-auto bg-base-100">
+             <div className="grid grid-cols-3 gap-2">
+               {gradeOptions.map((g) => (
+                 <label key={g} className="label cursor-pointer justify-start gap-2">
+                   <input
+                     type="checkbox"
+                     className="checkbox checkbox-sm"
+                    value={g}
+                    checked={Array.isArray(competition.grade) ? competition.grade.map((x) => String(x)).includes(g) : false}
+                     onChange={handleGradeToggle}
+                   />
+                  <span className="label-text">{g}</span>
+                 </label>
+               ))}
+             </div>
+           </div>
+         )}
+       </div>
         <button type="submit" className="btn btn-primary">
           Update
         </button>
