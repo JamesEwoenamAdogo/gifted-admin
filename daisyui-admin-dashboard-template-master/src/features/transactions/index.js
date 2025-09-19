@@ -191,7 +191,7 @@ function Transactions() {
 
     return (
         <TitleCard
-            title="All Users"
+            title={`All Users (${trans.length})`}
             topMargin="mt-2"
             TopSideButtons={
                 <TopSideButtons
