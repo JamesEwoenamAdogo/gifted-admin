@@ -213,8 +213,15 @@ export default function CreateQuiz() {
   const [displayScores, setDisplayScores] = useState(false);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [shuffleQuestions, setShuffleQuestions] = useState(false);
+  const [contest,setContest] = useState(false)
+  const [contestType, setContestType] = useState("")
+  const [pointsPerQuestion, setPointsPerQuestion] = useState("")
+  const [bonusTimeLimit, setBonusTimeLimit] = useState("")
+  const [estimatedTime, setEstimatedTime] = useState("")
+  const [endTime, setEndTime] = useState("")
   const [instructor,setInstructor] = useState("")
   const [level,setLevel]= useState("")
+  const [difficulty, setDifficulty] = useState("")
   const [courseInfo, setCourseInfo]= useState({
     tags:[],
     features:[]
@@ -273,9 +280,16 @@ export default function CreateQuiz() {
     formData.append("displayScores", displayScores);
     formData.append("showFeedBackForm", showFeedbackForm);
     formData.append("shuffleQuestions", shuffleQuestions);
+    formData.append("contest",contest)
+    formData.append("contestType", contestType);
+    formData.append("pointsPerQuestion", pointsPerQuestion);
+    formData.append("bonusTimeLimit", bonusTimeLimit);
+    formData.append("estimatedTime", estimatedTime);
+    formData.append("endTime", endTime);
     formData.append("questions", JSON.stringify(questions));
     formData.append("type","assessment")
     formData.append("level",level)
+    formData.append("difficulty", difficulty)
     formData.append("instructor",instructor)
     formData.append("tags",JSON.stringify(courseInfo.tags))
     formData.append("features",JSON.stringify(courseInfo.features))
@@ -472,6 +486,18 @@ export default function CreateQuiz() {
         onChange={(e) => setLevel(e.target.value)}
       />
 
+      <label className="block mb-2">Difficulty</label>
+      <select
+        className="w-full p-2 border rounded mb-4"
+        value={difficulty}
+        onChange={(e) => setDifficulty(e.target.value)}
+      >
+        <option value="">Select difficulty...</option>
+        <option value="easy">Easy</option>
+        <option value="intermediate">Intermediate</option>
+        <option value="hard">Hard</option>
+      </select>
+
       <label className="block mb-2">Description</label>
       <textarea
         className="w-full p-2 border rounded mb-4"
@@ -570,6 +596,68 @@ export default function CreateQuiz() {
         />
         <span>Publish this quiz</span>
       </label>
+      <label className="flex items-center space-x-2 mb-4">
+        <input
+          type="checkbox"
+          checked={contest}
+          onChange={(e) => setContest(e.target.checked)}
+        />
+        <span>Use this quiz as a contest</span>
+      </label>
+
+      {contest && (
+        <div className="border p-4 rounded mb-4 bg-gray-50">
+          <h3 className="text-lg font-semibold mb-4">Contest Configuration</h3>
+          
+          <label className="block mb-2">Contest Type</label>
+          <input
+            type="text"
+            className="w-full p-2 border rounded mb-4"
+            value={contestType}
+            onChange={(e) => setContestType(e.target.value)}
+            placeholder="e.g., Math Olympiad, Science Fair, etc."
+          />
+
+          <label className="block mb-2">Points Per Question</label>
+          <input
+            type="number"
+            className="w-full p-2 border rounded mb-4"
+            value={pointsPerQuestion}
+            onChange={(e) => setPointsPerQuestion(e.target.value)}
+            placeholder="Points awarded for each correct answer"
+            min="1"
+          />
+
+          <label className="block mb-2">Bonus Time Limit (minutes)</label>
+          <input
+            type="number"
+            className="w-full p-2 border rounded mb-4"
+            value={bonusTimeLimit}
+            onChange={(e) => setBonusTimeLimit(e.target.value)}
+            placeholder="Extra time allowed for bonus questions"
+            min="0"
+          />
+
+          <label className="block mb-2">Estimated Time (minutes)</label>
+          <input
+            type="number"
+            className="w-full p-2 border rounded mb-4"
+            value={estimatedTime}
+            onChange={(e) => setEstimatedTime(e.target.value)}
+            placeholder="Expected time to complete the contest"
+            min="1"
+          />
+
+          <label className="block mb-2">End Time</label>
+          <input
+            type="text"
+            className="w-full p-2 border rounded mb-4"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            placeholder="e.g., 7 hours from now , 2 weeks from now, etc."
+          />
+        </div>
+      )}
 
       <label className="block mb-2">Attempts Allowed</label>
       <input
