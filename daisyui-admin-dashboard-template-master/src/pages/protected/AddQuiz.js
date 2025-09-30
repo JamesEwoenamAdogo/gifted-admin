@@ -473,12 +473,26 @@ export default function CreateQuiz() {
         className="w-full p-2 border rounded mb-4"
         onChange={(e) => setTitle(e.target.value)}
       />
-      <label className="block mb-2">Instructor</label>
-      <input
-        type="text"
-        className="w-full p-2 border rounded mb-4"
-        onChange={(e) => setInstructor(e.target.value)}
-      />
+
+      <label className="flex items-center space-x-2 mb-4">
+        <input
+          type="checkbox"
+          checked={contest}
+          onChange={(e) => setContest(e.target.checked)}
+        />
+        <span>Use As Contest</span>
+      </label>
+
+      {!contest && (
+        <>
+          <label className="block mb-2">Instructor</label>
+          <input
+            type="text"
+            className="w-full p-2 border rounded mb-4"
+            onChange={(e) => setInstructor(e.target.value)}
+          />
+        </>
+      )}
       <label className="block mb-2">Level</label>
       <input
         type="text"
@@ -596,14 +610,6 @@ export default function CreateQuiz() {
         />
         <span>Publish this quiz</span>
       </label>
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={contest}
-          onChange={(e) => setContest(e.target.checked)}
-        />
-        <span>Use this quiz as a contest</span>
-      </label>
 
       {contest && (
         <div className="border p-4 rounded mb-4 bg-gray-50">
@@ -668,99 +674,107 @@ export default function CreateQuiz() {
         onChange={(e) => setAttemptsAllowed(e.target.value)}
       />
 
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={allowReview}
-          onChange={(e) => setAllowReview(e.target.checked)}
-        />
-        <span>Allow Review After Completion</span>
-      </label>
+      {!contest && (
+        <>
+          <label className="flex items-center space-x-2 mb-4">
+            <input
+              type="checkbox"
+              checked={allowReview}
+              onChange={(e) => setAllowReview(e.target.checked)}
+            />
+            <span>Allow Review After Completion</span>
+          </label>
 
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={displayScores}
-          onChange={(e) => setDisplayScores(e.target.checked)}
-        />
-        <span>Display Scores After Submission</span>
-      </label>
+          <label className="flex items-center space-x-2 mb-4">
+            <input
+              type="checkbox"
+              checked={displayScores}
+              onChange={(e) => setDisplayScores(e.target.checked)}
+            />
+            <span>Display Scores After Submission</span>
+          </label>
 
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={showFeedbackForm}
-          onChange={(e) => setShowFeedbackForm(e.target.checked)}
-        />
-        <span>Show Feedback Form After Quiz</span>
-      </label>
-      
-      <label className="flex items-center space-x-2 mb-4">
-        <input
-          type="checkbox"
-          checked={shuffleQuestions}
-          onChange={(e) => setShuffleQuestions(e.target.checked)}
-        />
-        <span>Shuffle Questions</span>
-      </label>
+          <label className="flex items-center space-x-2 mb-4">
+            <input
+              type="checkbox"
+              checked={showFeedbackForm}
+              onChange={(e) => setShowFeedbackForm(e.target.checked)}
+            />
+            <span>Show Feedback Form After Quiz</span>
+          </label>
+          
+          <label className="flex items-center space-x-2 mb-4">
+            <input
+              type="checkbox"
+              checked={shuffleQuestions}
+              onChange={(e) => setShuffleQuestions(e.target.checked)}
+            />
+            <span>Shuffle Questions</span>
+          </label>
+        </>
+      )}
        {/* Tags input */}
-      <div className="space-y-2">
-        <label className="font-medium">Tags</label>
-        {courseInfo.tags.map((tag, idx) => (
-          <div key={idx} className="flex gap-2 items-center">
-            <input
-              type="text"
-              placeholder="Tag"
-              className="border rounded p-2 flex-1"
-              value={tag}
-              onChange={(e) => updateTag(idx, e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={() => removeTag(idx)}
-              className="px-3 py-1 bg-red-100 text-red-600 rounded"
-            >
-              &times;
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={addTag}
-          className="mt-1 ml-1 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-        >
-          + Add Tag
-        </button>
-      </div>
+      {!contest && (
+        <div className="space-y-2">
+          <label className="font-medium">Tags</label>
+          {courseInfo.tags.map((tag, idx) => (
+            <div key={idx} className="flex gap-2 items-center">
+              <input
+                type="text"
+                placeholder="Tag"
+                className="border rounded p-2 flex-1"
+                value={tag}
+                onChange={(e) => updateTag(idx, e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => removeTag(idx)}
+                className="px-3 py-1 bg-red-100 text-red-600 rounded"
+              >
+                &times;
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addTag}
+            className="mt-1 ml-1 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+          >
+            + Add Tag
+          </button>
+        </div>
+      )}
        {/* Features input */}
-      <div className="space-y-2">
-        <label className="font-medium">Features</label>
-        {courseInfo.features.map((feat, idx) => (
-          <div key={idx} className="flex gap-2 items-center">
-            <input
-              type="text"
-              placeholder="Feature"
-              className="border rounded p-2 flex-1"
-              value={feat}
-              onChange={(e) => updateFeature(idx, e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={() => removeFeature(idx)}
-              className="px-3 py-1 bg-red-100 text-red-600 rounded"
-            >
-              &times;
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={addFeature}
-          className="mt-1 ml-1 mb-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
-        >
-          + Add Feature
-        </button>
-      </div>
+      {!contest && (
+        <div className="space-y-2">
+          <label className="font-medium">Features</label>
+          {courseInfo.features.map((feat, idx) => (
+            <div key={idx} className="flex gap-2 items-center">
+              <input
+                type="text"
+                placeholder="Feature"
+                className="border rounded p-2 flex-1"
+                value={feat}
+                onChange={(e) => updateFeature(idx, e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => removeFeature(idx)}
+                className="px-3 py-1 bg-red-100 text-red-600 rounded"
+              >
+                &times;
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addFeature}
+            className="mt-1 ml-1 mb-2 bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+          >
+            + Add Feature
+          </button>
+        </div>
+      )}
 
       {questions.map((q, qIndex) => (
         <div key={qIndex} className="border p-4 rounded mb-4 mt-4">
