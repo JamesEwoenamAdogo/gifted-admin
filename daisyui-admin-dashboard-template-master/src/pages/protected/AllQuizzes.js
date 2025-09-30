@@ -5,6 +5,7 @@ export default function ItemList() {
   const [items, setItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredItems, setFilteredItems] = useState([]);
+  const [activeTab, setActiveTab] = useState("normal"); // "normal" or "contests"
 
   useEffect(() => {
     const fetchExams = async () => {
@@ -12,6 +13,7 @@ export default function ItemList() {
         const response = await axios.get("/all-exams-admin");
         const allExaminations = response.data.allExaminations || [];
         setItems(allExaminations);
+        console.log(items)
         setFilteredItems(allExaminations);
       } catch (error) {
         console.error("Error fetching exams:", error);
@@ -22,15 +24,41 @@ export default function ItemList() {
 
   useEffect(() => {
     const term = searchTerm.trim().toLowerCase();
-    if (!term) {
-      setFilteredItems(items);
+    
+    // Debug: Log the items and their contest values
+    console.log("All items:", items);
+    console.log("Active tab:", activeTab);
+    items.forEach((item, index) => {
+      console.log(`Item ${index}:`, item.title, "contest value:", item.contest, "type:", typeof item.contest);
+    });
+    
+    // First filter by tab (normal quizzes vs contests)
+    let tabFilteredItems = items;
+    if (activeTab === "contests") {
+      // Show only items where contest is explicitly true
+      tabFilteredItems = items.filter((item) => item.contest === true);
     } else {
-      const filtered = items.filter((item) =>
+      // Show items where contest is false, undefined, or null
+      tabFilteredItems = items.filter((item) => 
+        item.contest === false || 
+        item.contest === undefined || 
+        item.contest === null ||
+        item.contest === ""
+      );
+    }
+    
+    console.log("Filtered items for tab:", tabFilteredItems.length);
+    
+    // Then filter by search term
+    if (!term) {
+      setFilteredItems(tabFilteredItems);
+    } else {
+      const filtered = tabFilteredItems.filter((item) =>
         item.title.toLowerCase().includes(term)
       );
       setFilteredItems(filtered);
     }
-  }, [searchTerm, items]);
+  }, [searchTerm, items, activeTab]);
 
   const handleViewDetails = (item) => {
     localStorage.setItem("id", item._id);
@@ -54,6 +82,32 @@ export default function ItemList() {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Item List</h1>
+
+      {/* Tab Filter */}
+      <div className="mb-6">
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+          <button
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              activeTab === "normal"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+            onClick={() => setActiveTab("normal")}
+          >
+            Quizzes
+          </button>
+          <button
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              activeTab === "contests"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+            onClick={() => setActiveTab("contests")}
+          >
+            Contests
+          </button>
+        </div>
+      </div>
 
       {/* Live Search Input */}
       <div className="mb-6">
@@ -95,9 +149,38 @@ export default function ItemList() {
         ))}
 
         {filteredItems.length === 0 && (
-          <p className="text-center text-gray-500">No quizzes found.</p>
+          <p className="text-center text-gray-500">
+            {activeTab === "contests" ? "No contests found." : "No normal quizzes found."}
+          </p>
         )}
       </div>
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
