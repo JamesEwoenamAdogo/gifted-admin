@@ -36,6 +36,7 @@ const QuizDetails = () => {
         setImagePreview(details[field]);
       }
     }
+  
     setEditingField(field);
   };
 
@@ -300,10 +301,22 @@ const QuizDetails = () => {
         <p><strong>Featured:</strong> {details.featured ? "Yes" : "No"} {renderEditButton('featured')}</p>
         <p><strong>Published:</strong> {details.publish ? "Yes" : "No"} {renderEditButton('publish')}</p>
         <p><strong>Attempts Allowed:</strong> {details.attemptsAllowed} {renderEditButton('attemptsAllowed')}</p>
-        <p><strong>Allow Review:</strong> {details.allowQuizReview ? "Yes" : "No"} {renderEditButton('allowQuizReview')}</p>
+        {!details.contest && <p><strong>Allow Review:</strong> {details.allowQuizReview ? "Yes" : "No"} {renderEditButton('allowQuizReview')}</p>}
         <p><strong>Display Scores:</strong> {details.displayScores ? "Yes" : "No"} {renderEditButton('displayScores')}</p>
         {/* <p><strong>Item Display Scores:</strong> {details.itemdisplayScores ? "Yes" : "No"} {renderEditButton('displayScores')}</p> */}
-        <p><strong>Show Feedback Form:</strong> {details.showFeedBackForm ? "Yes" : "No"} {renderEditButton('showFeedBackForm')}</p>
+        {!details.contest && <p><strong>Show Feedback Form:</strong> {details.showFeedBackForm ? "Yes" : "No"} {renderEditButton('showFeedBackForm')}</p>}
+
+        {/* Contest-specific features */}
+        {details.contest && (
+          <div className="my-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3 text-orange-800">Contest Details</h3>
+            <p><strong>Contest Type:</strong> {details.contestType || 'N/A'} {renderEditButton('contestType')}</p>
+            <p><strong>Difficulty:</strong> {details.difficulty || 'N/A'} {renderEditButton('difficulty')}</p>
+            <p><strong>Points Per Question:</strong> {details.pointsPerQuestion || 'N/A'} {renderEditButton('pointsPerQuestion')}</p>
+            <p><strong>Estimated Time:</strong> {details.estimatedTime || 'N/A'} {renderEditButton('estimatedTime')}</p>
+            {details.bonusTimeLimit && <p><strong>Bonus Time Limit:</strong> {details.bonusTimeLimit} seconds {renderEditButton('bonusTimeLimit')}</p>}
+          </div>
+        )}
 
         <div className="my-4">
           <p><strong>Image:</strong> {renderEditButton('image')}</p>
@@ -438,6 +451,18 @@ const QuizDetails = () => {
                   name={editingField}
                   checked={!!formData[editingField]}
                   onChange={handleChange}
+                />
+              </div>
+            ) : ['contestType', 'difficulty', 'pointsPerQuestion', 'estimatedTime', 'bonusTimeLimit'].includes(editingField) ? (
+              <div>
+                <label className="block mb-1 capitalize">{editingField.replace(/([A-Z])/g, ' $1')}:</label>
+                <input
+                  type={editingField === 'bonusTimeLimit' || editingField === 'pointsPerQuestion' ? 'number' : 'text'}
+                  name={editingField}
+                  value={formData[editingField] || ''}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
+                  placeholder={`Enter ${editingField.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
                 />
               </div>
             ) : editingField === 'attemptsAllowed' ? (
