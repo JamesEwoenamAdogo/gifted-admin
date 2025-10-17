@@ -232,6 +232,7 @@ export default function CreateQuiz() {
   const [examLink, setExamLink] = useState("https://example.com/exam/12345");
   const [isSubmittingExcel, setIsSubmittingExcel] = useState(false);
   const [excelResponse, setExcelResponse] = useState(null);
+  const [instructions, setInstructions] = useState([]);
 
   // Fetch all competitions for program selection
   useEffect(() => {
@@ -301,6 +302,7 @@ export default function CreateQuiz() {
     formData.append("features",JSON.stringify(courseInfo.features))
     formData.append("examMode", examMode);
     formData.append("timePerQuestion", timePerQuestion);
+    formData.append("instructions", JSON.stringify(instructions));
     if (excelFile) {
       formData.append("excelFile", excelFile);
     }
@@ -399,6 +401,22 @@ export default function CreateQuiz() {
       const f = prev.features.filter((_, i) => i !== index);
       return { ...prev, features: f };
     });
+  };
+
+  // Handle instructions management
+  const addInstruction = () => {
+    setInstructions([...instructions, ""]);
+  };
+
+  const updateInstruction = (index, value) => {
+    const updatedInstructions = [...instructions];
+    updatedInstructions[index] = value;
+    setInstructions(updatedInstructions);
+  };
+
+  const removeInstruction = (index) => {
+    const updatedInstructions = instructions.filter((_, i) => i !== index);
+    setInstructions(updatedInstructions);
   };
 
   // Handle Excel file submission
@@ -608,6 +626,7 @@ export default function CreateQuiz() {
               />
             </div>
 
+
             {/* Exam Link Section */}
             <div className="p-4 bg-white border rounded">
               <h3 className="text-md font-semibold mb-2">Exam Link</h3>
@@ -680,6 +699,57 @@ export default function CreateQuiz() {
         className="w-full p-2 border rounded mb-4"
         onChange={(e) => setDescription(e.target.value)}
       ></textarea>
+
+      {/* Instructions Section */}
+      <div className="mb-4">
+        <label className="block mb-2 font-semibold">Instructions</label>
+        <p className="text-sm text-gray-600 mb-3">
+          Add specific instructions for students taking this quiz/exam.
+        </p>
+        
+        {instructions.map((instruction, index) => (
+          <div key={index} className="flex gap-2 items-start mb-3">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder={`Instruction ${index + 1}`}
+                className="w-full p-2 border rounded"
+                value={instruction}
+                onChange={(e) => updateInstruction(index, e.target.value)}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => removeInstruction(index)}
+              className="px-3 py-2 bg-red-100 text-red-600 rounded hover:bg-red-200 flex-shrink-0"
+              title="Remove instruction"
+            >
+              ×
+            </button>
+          </div>
+        ))}
+        
+        <button
+          type="button"
+          onClick={addInstruction}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 mb-3"
+        >
+          + Add Instruction
+        </button>
+        
+        {instructions.length > 0 && (
+          <div className="p-3 bg-gray-50 rounded">
+            <h4 className="text-sm font-semibold mb-2">Preview:</h4>
+            <ol className="text-sm text-gray-700 list-decimal list-inside space-y-1">
+              {instructions.map((instruction, index) => (
+                <li key={index}>
+                  {instruction || <span className="text-gray-400 italic">Empty instruction</span>}
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
 
       <label className="block mb-2">Image</label>
       <input
