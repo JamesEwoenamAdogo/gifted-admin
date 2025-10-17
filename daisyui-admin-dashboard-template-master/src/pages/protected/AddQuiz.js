@@ -229,7 +229,7 @@ export default function CreateQuiz() {
   const [examMode, setExamMode] = useState(false);
   const [excelFile, setExcelFile] = useState(null);
   const [timePerQuestion, setTimePerQuestion] = useState("");
-  const [examLink, setExamLink] = useState("https://example.com/exam/12345");
+  const [examLink, setExamLink] = useState("https://www.giftededu.tech/exam");
   const [isSubmittingExcel, setIsSubmittingExcel] = useState(false);
   const [excelResponse, setExcelResponse] = useState(null);
   const [instructions, setInstructions] = useState([]);
