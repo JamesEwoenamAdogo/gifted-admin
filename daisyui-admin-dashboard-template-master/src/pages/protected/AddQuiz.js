@@ -226,6 +226,12 @@ export default function CreateQuiz() {
     tags:[],
     features:[]
   })
+  const [examMode, setExamMode] = useState(false);
+  const [excelFile, setExcelFile] = useState(null);
+  const [timePerQuestion, setTimePerQuestion] = useState("");
+  const [examLink, setExamLink] = useState("https://example.com/exam/12345");
+  const [isSubmittingExcel, setIsSubmittingExcel] = useState(false);
+  const [excelResponse, setExcelResponse] = useState(null);
 
   // Fetch all competitions for program selection
   useEffect(() => {
@@ -293,6 +299,11 @@ export default function CreateQuiz() {
     formData.append("instructor",instructor)
     formData.append("tags",JSON.stringify(courseInfo.tags))
     formData.append("features",JSON.stringify(courseInfo.features))
+    formData.append("examMode", examMode);
+    formData.append("timePerQuestion", timePerQuestion);
+    if (excelFile) {
+      formData.append("excelFile", excelFile);
+    }
 
     
 
@@ -390,6 +401,48 @@ export default function CreateQuiz() {
     });
   };
 
+  // Handle Excel file submission
+  const handleExcelSubmit = async () => {
+    if (!excelFile || !title) {
+      alert('Please upload an Excel file and enter a title first.');
+      return;
+    }
+
+    setIsSubmittingExcel(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', excelFile);
+
+      const response = await axios.post(
+        `https://gifted-exams.onrender.com/api/v1/add-exam-students/${encodeURIComponent(title)}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          responseType: 'blob', // Important for file downloads
+        }
+      );
+
+      // Create a blob URL for the downloaded file
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      const url = window.URL.createObjectURL(blob);
+      
+      setExcelResponse({
+        url: url,
+        filename: `processed_${title}_${Date.now()}.xlsx`
+      });
+
+    } catch (error) {
+      console.error('Error submitting Excel file:', error);
+      alert('Error processing Excel file. Please try again.');
+    } finally {
+      setIsSubmittingExcel(false);
+    }
+  };
+
   useEffect(() => {
     console.log(
       title,
@@ -473,6 +526,116 @@ export default function CreateQuiz() {
         className="w-full p-2 border rounded mb-4"
         onChange={(e) => setTitle(e.target.value)}
       />
+
+      {/* Exam Mode Toggle */}
+      <div className="mb-6 p-4 border rounded bg-blue-50">
+        <label className="flex items-center space-x-2 mb-4">
+          <input
+            type="checkbox"
+            checked={examMode}
+            onChange={(e) => setExamMode(e.target.checked)}
+            className="w-4 h-4"
+          />
+          <span className="text-lg font-semibold">Exam Mode</span>
+        </label>
+
+        {examMode && (
+          <div className="space-y-4">
+            {/* Excel Upload Section */}
+            <div className="p-4 bg-white border rounded">
+              <h3 className="text-md font-semibold mb-2">Student Data Upload</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                Upload an Excel sheet with student information. The sheet should have the following columns:
+              </p>
+              <ul className="text-sm text-gray-600 mb-3 list-disc list-inside">
+                <li><strong>name</strong> - Student's full name</li>
+                <li><strong>school</strong> - School name</li>
+                <li><strong>grade</strong> - Student's grade level</li>
+              </ul>
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                className="w-full p-2 border rounded"
+                onChange={(e) => setExcelFile(e.target.files[0])}
+              />
+              {excelFile && (
+                <div className="mt-3">
+                  <p className="text-sm text-green-600 mb-2">
+                    ✓ File selected: {excelFile.name}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleExcelSubmit}
+                    disabled={isSubmittingExcel}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {isSubmittingExcel ? 'Processing...' : 'Process Excel File'}
+                  </button>
+                </div>
+              )}
+              
+              {/* Display processed file */}
+              {excelResponse && (
+                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
+                  <h4 className="text-sm font-semibold text-green-800 mb-2">Processed File Ready</h4>
+                  <p className="text-sm text-green-700 mb-2">
+                    Your Excel file has been processed successfully!
+                  </p>
+                  <a
+                    href={excelResponse.url}
+                    download={excelResponse.filename}
+                    className="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Download Processed File
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Time Per Question */}
+            <div className="p-4 bg-white border rounded">
+              <label className="block mb-2 font-semibold">Time Per Question (minutes)</label>
+              <input
+                type="number"
+                min="1"
+                className="w-full p-2 border rounded"
+                value={timePerQuestion}
+                onChange={(e) => setTimePerQuestion(e.target.value)}
+                placeholder="Enter time in minutes"
+              />
+            </div>
+
+            {/* Exam Link Section */}
+            <div className="p-4 bg-white border rounded">
+              <h3 className="text-md font-semibold mb-2">Exam Link</h3>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="text"
+                  value={examLink}
+                  readOnly
+                  className="flex-1 p-2 border rounded bg-gray-50"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(examLink);
+                    alert('Link copied to clipboard!');
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Copy Link
+                </button>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">
+                Share this link with students to start the exam
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
       <label className="flex items-center space-x-2 mb-4">
         <input
