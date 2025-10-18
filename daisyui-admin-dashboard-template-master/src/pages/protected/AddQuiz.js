@@ -187,8 +187,8 @@ const RichTextEditor = ({ value, onChange, placeholder, modules, formats }) => {
             />
           ) : (
             <div className="p-4 border rounded bg-yellow-50 text-yellow-800">
-              <p className="font-semibold">Rich Text Editor Unavailable</p>
-              <p className="text-sm">Please install react-quill package: npm install react-quill</p>
+              {/* <p className="font-semibold">Rich Text Editor Unavailable</p> */}
+              {/* <p className="text-sm">Please install react-quill package: npm install react-quill</p> */}
               <textarea
                 className="w-full p-2 mt-2 border rounded"
                 value={value || ''}
