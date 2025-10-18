@@ -1,9 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 import 'katex/dist/katex.min.css';
 import katex from 'katex';
+
+// Import ReactQuill with error handling
+let ReactQuill;
+try {
+  ReactQuill = require('react-quill').default;
+  require('react-quill/dist/quill.snow.css');
+} catch (error) {
+  console.error('Failed to import ReactQuill:', error);
+  ReactQuill = null;
+}
 
 if (typeof window !== 'undefined') {
   // Make KaTeX available to Quill's formula module
@@ -13,9 +21,10 @@ if (typeof window !== 'undefined') {
 }
 
 // Reusable rich text editor with HTML toggle and counters
-function RichTextEditor({ value, onChange, placeholder, modules, formats }) {
+const RichTextEditor = ({ value, onChange, placeholder, modules, formats }) => {
   const [isHtmlMode, setIsHtmlMode] = useState(false);
   const editorRef = useRef(null);
+
 
   const stripHtml = (html) => {
     const div = document.createElement('div');
@@ -166,15 +175,28 @@ function RichTextEditor({ value, onChange, placeholder, modules, formats }) {
             placeholder={placeholder}
           />
         ) : (
-          <ReactQuill
-            ref={editorRef}
-            theme="snow"
-            value={value}
-            onChange={(html) => onChange(html)}
-            modules={modules}
-            formats={formats}
-            placeholder={placeholder}
-          />
+          ReactQuill ? (
+            <ReactQuill
+              ref={editorRef}
+              theme="snow"
+              value={value}
+              onChange={(html) => onChange(html)}
+              modules={modules}
+              formats={formats}
+              placeholder={placeholder}
+            />
+          ) : (
+            <div className="p-4 border rounded bg-yellow-50 text-yellow-800">
+              <p className="font-semibold">Rich Text Editor Unavailable</p>
+              <p className="text-sm">Please install react-quill package: npm install react-quill</p>
+              <textarea
+                className="w-full p-2 mt-2 border rounded"
+                value={value || ''}
+                onChange={(e) => onChange(e.target.value)}
+                placeholder={placeholder}
+              />
+            </div>
+          )
         )}
       </div>
 
@@ -193,7 +215,7 @@ function RichTextEditor({ value, onChange, placeholder, modules, formats }) {
       </div>
     </div>
   );
-}
+};
 
 export default function CreateQuiz() {
   const [questions, setQuestions] = useState([]);
@@ -229,7 +251,7 @@ export default function CreateQuiz() {
   const [examMode, setExamMode] = useState(false);
   const [excelFile, setExcelFile] = useState(null);
   const [timePerQuestion, setTimePerQuestion] = useState("");
-  const [examLink, setExamLink] = useState("https://www.giftededu.tech/exam");
+  const [examLink, setExamLink] = useState(`https://www.giftededu.tech/exam`);
   const [isSubmittingExcel, setIsSubmittingExcel] = useState(false);
   const [excelResponse, setExcelResponse] = useState(null);
   const [instructions, setInstructions] = useState([]);
@@ -303,9 +325,9 @@ export default function CreateQuiz() {
     formData.append("examMode", examMode);
     formData.append("timePerQuestion", timePerQuestion);
     formData.append("instructions", JSON.stringify(instructions));
-    if (excelFile) {
-      formData.append("excelFile", excelFile);
-    }
+    // if (excelFile) {
+    //   formData.append("excelFile", excelFile);
+    // }
 
     
 
@@ -320,6 +342,7 @@ export default function CreateQuiz() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log(response.data);
+      setExamLink(prev=> `${prev}/${response.data.id}`)
     } catch (error) {
       console.error("Error submitting quiz:", error);
     }
@@ -551,7 +574,7 @@ export default function CreateQuiz() {
           <input
             type="checkbox"
             checked={examMode}
-            onChange={(e) => setExamMode(e.target.checked)}
+            onChange={(e) => {setExamMode(e.target.checked)}}
             className="w-4 h-4"
           />
           <span className="text-lg font-semibold">Exam Mode</span>
