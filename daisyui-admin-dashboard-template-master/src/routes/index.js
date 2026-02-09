@@ -24,7 +24,7 @@ const DocFeatures = lazy(() => import('../pages/DocFeatures'))
 const DocComponents = lazy(() => import('../pages/DocComponents'))
 const UserDetails = lazy(() => import('../pages/protected/userDetails'))
 const AddOnsInput = lazy(() => import('../pages/protected/AddOnsInput'))
-const ExamsDetails = lazy(() => import('../pages/protected/examDetails'))
+// const ExamsDetails = lazy(() => import('../pages/protected/examDetails'))
 const AssessmentManagement = lazy(() => import('../pages/protected/AssessmentManagement'))
 const AddQuiz = lazy(() => import('../pages/protected/AddQuiz'))
 const AddCourse = lazy(() => import('../pages/protected/AddCourse'))
@@ -185,10 +185,10 @@ const routes = [
     path: '/user-details',
     component: UserDetails,
   },
-  {
-    path: '/exam-details',
-    component: ExamsDetails,
-  },
+  // {
+  //   path: '/exam-details',
+  //   component: ExamsDetails,
+  // },
   {
     path: '/exam-mode',
     component: ExamsMode,
