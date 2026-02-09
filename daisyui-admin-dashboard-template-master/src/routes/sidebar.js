@@ -66,10 +66,10 @@ const routes = [
     path:"/app/timed-challenge",
     name:"Timed Challenge"
   },
-  {
-    path:"/app/timed-challenge",
-    name:"Timed Challenge"
-  },
+  // {
+  //   path:"/app/timed-challenge",
+  //   name:"Timed Challenge"
+  // },
   {
     path:"/app/pathway-manager",
     name:"Pathway Manager"
