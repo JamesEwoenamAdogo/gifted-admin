@@ -255,6 +255,8 @@ export default function CreateQuiz() {
   const [isSubmittingExcel, setIsSubmittingExcel] = useState(false);
   const [excelResponse, setExcelResponse] = useState(null);
   const [instructions, setInstructions] = useState([]);
+  const [excelPreview, setExcelPreview] = useState(null);
+  const [excelValidationErrors, setExcelValidationErrors] = useState([]);
 
   // Fetch all competitions for program selection
   useEffect(() => {
@@ -442,10 +444,123 @@ export default function CreateQuiz() {
     setInstructions(updatedInstructions);
   };
 
+  // Function to validate Excel file content
+  const validateExcelFile = async (file) => {
+    const errors = [];
+    const warnings = [];
+    
+    try {
+      // Create a simple file reader to check if it's a valid Excel file
+      const reader = new FileReader();
+      
+      return new Promise((resolve) => {
+        reader.onload = (e) => {
+          const data = e.target.result;
+          
+          // Basic Excel file validation
+          if (file.name.toLowerCase().endsWith('.xlsx')) {
+            // Check for Excel 2007+ format signature
+            const xlsxSignature = data.slice(0, 4);
+            if (xlsxSignature !== 'PK\x03\x04') {
+              errors.push('Invalid .xlsx file format - file may be corrupted or not a real Excel file');
+              warnings.push('This file has a .xlsx extension but is not a valid Excel file');
+              warnings.push('The file may have been created with a different program or corrupted');
+            } else {
+              // Check for potential issues in XLSX files
+              warnings.push('XLSX file detected - ensure it was created with Excel 2007 or later');
+            }
+          } else if (file.name.toLowerCase().endsWith('.xls')) {
+            // Check for Excel 97-2003 format signature
+            const xlsSignature = data.slice(0, 8);
+            if (xlsSignature !== '\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1') {
+              errors.push('Invalid .xls file format');
+            } else {
+              warnings.push('XLS file detected - older format may cause compatibility issues');
+            }
+          }
+          
+          // Check file size for potential issues
+          if (file.size < 1024) {
+            warnings.push('File is very small - may be empty or corrupted');
+          } else if (file.size > 5 * 1024 * 1024) {
+            warnings.push('Large file size - may cause processing delays');
+          }
+          
+          resolve({ errors, warnings });
+        };
+        
+        reader.onerror = () => {
+          errors.push('Could not read file');
+          resolve({ errors, warnings });
+        };
+        
+        // Read first 1KB to check file signature
+        reader.readAsArrayBuffer(file.slice(0, 1024));
+      });
+    } catch (error) {
+      errors.push('File validation error: ' + error.message);
+      return { errors, warnings };
+    }
+  };
+
+  // Function to handle Excel file selection
+  const handleExcelFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      setExcelFile(null);
+      setExcelPreview(null);
+      setExcelValidationErrors([]);
+      return;
+    }
+
+    setExcelFile(file);
+    
+    // Validate file
+    const validation = await validateExcelFile(file);
+    setExcelValidationErrors(validation.errors);
+    
+    if (validation.errors.length === 0) {
+      setExcelPreview({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+        warnings: validation.warnings
+      });
+    }
+  };
+
   // Handle Excel file submission
   const handleExcelSubmit = async () => {
     if (!excelFile || !title) {
       alert('Please upload an Excel file and enter a title first.');
+      return;
+    }
+
+    // Validate file before submission
+    const validTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+      'application/excel',
+      'application/x-excel',
+      'application/x-msexcel'
+    ];
+    
+    const validExtensions = ['.xlsx', '.xls'];
+    const fileExtension = excelFile.name.toLowerCase().substring(excelFile.name.lastIndexOf('.'));
+    
+    if (!validTypes.includes(excelFile.type) && !validExtensions.includes(fileExtension)) {
+      alert(`Invalid file type. Please upload an Excel file (.xlsx or .xls).\nDetected type: ${excelFile.type}\nDetected extension: ${fileExtension}`);
+      return;
+    }
+    
+    if (excelFile.size === 0) {
+      alert('The selected file is empty. Please choose a valid Excel file.');
+      return;
+    }
+    
+    if (excelFile.size > 10 * 1024 * 1024) { // 10MB limit
+      alert('File size is too large. Please choose an Excel file smaller than 10MB.');
       return;
     }
 
@@ -454,8 +569,16 @@ export default function CreateQuiz() {
       const formData = new FormData();
       formData.append('file', excelFile);
 
+      console.log('Submitting Excel file:', {
+        fileName: excelFile.name,
+        fileSize: excelFile.size,
+        fileType: excelFile.type,
+        title: title,
+        url: `http://localhost:10000/api/v1/add-exam-students/${encodeURIComponent(title)}`
+      });
+
       const response = await axios.post(
-        `https://gifted-exams.onrender.com/api/v1/add-exam-students/${encodeURIComponent(title)}`,
+        `http://localhost:10000/api/v1/add-exam-students/${encodeURIComponent(title)}`,
         formData,
         {
           headers: {
@@ -464,6 +587,8 @@ export default function CreateQuiz() {
           responseType: 'blob', // Important for file downloads
         }
       );
+
+      console.log('Excel upload successful:', response);
 
       // Create a blob URL for the downloaded file
       const blob = new Blob([response.data], {
@@ -478,7 +603,44 @@ export default function CreateQuiz() {
 
     } catch (error) {
       console.error('Error submitting Excel file:', error);
-      alert('Error processing Excel file. Please try again.');
+      
+      // Enhanced error logging
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+        console.error('Response data:', error.response.data);
+        
+        // Try to read the error response as text if it's a blob
+        if (error.response.data instanceof Blob) {
+          try {
+            const errorText = await error.response.data.text();
+            console.error('Error response text:', errorText);
+            
+            // Handle specific error messages
+            if (errorText.includes('No valid records found') || errorText.includes('no valid records')) {
+              alert(`Excel Processing Error: No valid records found in your Excel file.\n\nPlease check that your Excel file has:\n• Column headers: "name", "school", "grade" (exact spelling, plain text)\n• Remove ALL formatting (bold, italic, colors, etc.)\n• Data starting from row 2\n• No empty rows between header and data\n• At least one row of student data\n\nCommon issues:\n• Bold/italic headers can cause parsing errors\n• Extra spaces in column names\n• Case sensitivity (use lowercase)\n\nError details: ${errorText}`);
+            } else {
+              alert(`Server Error: ${error.response.status} - ${errorText}`);
+            }
+          } catch (e) {
+            console.error('Could not read error response as text');
+            alert(`Server Error: ${error.response.status} - Bad Request`);
+          }
+        } else {
+          const errorData = JSON.stringify(error.response.data);
+          if (errorData.includes('No valid records found') || errorData.includes('no valid records')) {
+            alert(`Excel Processing Error: No valid records found in your Excel file.\n\nPlease check that your Excel file has:\n• Column headers: "name", "school", "grade" (exact spelling, plain text)\n• Remove ALL formatting (bold, italic, colors, etc.)\n• Data starting from row 2\n• No empty rows between header and data\n• At least one row of student data\n\nCommon issues:\n• Bold/italic headers can cause parsing errors\n• Extra spaces in column names\n• Case sensitivity (use lowercase)\n\nError details: ${errorData}`);
+          } else {
+            alert(`Server Error: ${error.response.status} - ${errorData}`);
+          }
+        }
+      } else if (error.request) {
+        console.error('Request error:', error.request);
+        alert('Network Error: Could not reach the server. Please check if the server is running on localhost:10000');
+      } else {
+        console.error('Error setting up request:', error.message);
+        alert(`Request Error: ${error.message}`);
+      }
     } finally {
       setIsSubmittingExcel(false);
     }
@@ -597,21 +759,137 @@ export default function CreateQuiz() {
                 type="file"
                 accept=".xlsx,.xls"
                 className="w-full p-2 border rounded"
-                onChange={(e) => setExcelFile(e.target.files[0])}
+                onChange={handleExcelFileChange}
               />
               {excelFile && (
                 <div className="mt-3">
-                  <p className="text-sm text-green-600 mb-2">
-                    ✓ File selected: {excelFile.name}
-                  </p>
+                  {/* File validation errors */}
+                  {excelValidationErrors.length > 0 && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded mb-3">
+                      <h4 className="text-sm font-semibold text-red-800 mb-2">File Validation Errors:</h4>
+                      <ul className="text-sm text-red-700 list-disc list-inside space-y-1">
+                        {excelValidationErrors.map((error, index) => (
+                          <li key={index}>{error}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  
+                  {/* File information */}
+                  <div className="p-3 bg-gray-50 border rounded mb-3">
+                    <p className={`text-sm mb-2 ${excelValidationErrors.length > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {excelValidationErrors.length > 0 ? '⚠️ File has issues:' : '✓ File selected:'} {excelFile.name}
+                    </p>
+                    <div className="text-xs text-gray-600 space-y-1">
+                      <p><strong>File size:</strong> {(excelFile.size / 1024).toFixed(2)} KB</p>
+                      <p><strong>File type:</strong> {excelFile.type || 'Unknown'}</p>
+                      <p><strong>Last modified:</strong> {new Date(excelFile.lastModified).toLocaleString()}</p>
+                    </div>
+                    
+                    {/* Warnings display */}
+                    {excelPreview?.warnings && excelPreview.warnings.length > 0 && (
+                      <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                        <p className="text-xs font-semibold text-yellow-800 mb-1">⚠️ File Warnings:</p>
+                        <ul className="text-xs text-yellow-700 list-disc list-inside space-y-1">
+                          {excelPreview.warnings.map((warning, index) => (
+                            <li key={index}>{warning}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Excel file requirements */}
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded mb-3">
+                    <h4 className="text-sm font-semibold text-blue-800 mb-2">Required Excel Format:</h4>
+                    <div className="text-sm text-blue-700">
+                      <p className="mb-2">Your Excel file must have these exact column headers in the first row:</p>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="bg-white p-2 rounded border">name</div>
+                        <div className="bg-white p-2 rounded border">school</div>
+                        <div className="bg-white p-2 rounded border">grade</div>
+                      </div>
+                      <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                        <p className="text-xs font-semibold text-yellow-800 mb-1">⚠️ Formatting Requirements:</p>
+                        <p className="text-xs">• Column names are case-sensitive</p>
+                        <p className="text-xs">• Remove ALL formatting (bold, italic, colors, etc.)</p>
+                        <p className="text-xs">• Use plain text only</p>
+                        <p className="text-xs">• Data should start from row 2</p>
+                        <p className="text-xs">• No empty rows between header and data</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Troubleshooting for files from other sources */}
+                  <div className="p-3 bg-orange-50 border border-orange-200 rounded mb-3">
+                    <h4 className="text-sm font-semibold text-orange-800 mb-2">🔧 Files from Other Sources:</h4>
+                    <div className="text-sm text-orange-700">
+                      <p className="mb-2">If this file was created by someone else or on a different computer:</p>
+                      <div className="space-y-1 text-xs">
+                        <p>• <strong>Save As:</strong> Open the file and "Save As" a new Excel file</p>
+                        <p>• <strong>Copy Data:</strong> Copy all data to a new Excel file</p>
+                        <p>• <strong>Remove Formatting:</strong> Select all cells and clear formatting</p>
+                        <p>• <strong>Check Encoding:</strong> Ensure file is saved as UTF-8 compatible</p>
+                        <p>• <strong>Version Issues:</strong> Older Excel versions may create compatibility issues</p>
+                      </div>
+                      <div className="mt-2 p-2 bg-white border rounded">
+                        <p className="text-xs font-semibold text-orange-800 mb-1">Quick Fix Steps:</p>
+                        <ol className="text-xs text-orange-700 list-decimal list-inside space-y-1">
+                          <li>Open the problematic file in Excel</li>
+                          <li>Select all data (Ctrl+A)</li>
+                          <li>Copy (Ctrl+C)</li>
+                          <li>Create a new Excel file</li>
+                          <li>Paste (Ctrl+V)</li>
+                          <li>Save the new file</li>
+                          <li>Try uploading the new file</li>
+                        </ol>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Invalid Excel file format troubleshooting */}
+                  {excelValidationErrors.some(error => error.includes('Invalid .xlsx file format')) && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded mb-3">
+                      <h4 className="text-sm font-semibold text-red-800 mb-2">🚨 Invalid Excel File Format:</h4>
+                      <div className="text-sm text-red-700">
+                        <p className="mb-2">This file has a .xlsx extension but is not a valid Excel file. Common causes:</p>
+                        <div className="space-y-1 text-xs">
+                          <p>• <strong>Wrong Program:</strong> File was created with LibreOffice, Google Sheets, or other programs</p>
+                          <p>• <strong>Corrupted File:</strong> File was damaged during transfer or storage</p>
+                          <p>• <strong>Fake Extension:</strong> File was renamed but isn't actually an Excel file</p>
+                          <p>• <strong>Export Issues:</strong> File was exported incorrectly from another program</p>
+                        </div>
+                        <div className="mt-3 p-2 bg-white border rounded">
+                          <p className="text-xs font-semibold text-red-800 mb-1">🔧 How to Fix:</p>
+                          <ol className="text-xs text-red-700 list-decimal list-inside space-y-1">
+                            <li><strong>Try opening in Excel:</strong> If it opens, use "Save As" to create a new file</li>
+                            <li><strong>If it won't open:</strong> Ask the sender to re-save the file properly</li>
+                            <li><strong>Alternative:</strong> Ask them to send as .xls format instead</li>
+                            <li><strong>Last resort:</strong> Ask them to copy data to a new Excel file</li>
+                          </ol>
+                        </div>
+                        <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                          <p className="text-xs font-semibold text-yellow-800 mb-1">💡 For the Sender:</p>
+                          <p className="text-xs text-yellow-700">Ask them to: Open the file → File → Save As → Choose "Excel Workbook (.xlsx)" → Save</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   <button
                     type="button"
                     onClick={handleExcelSubmit}
-                    disabled={isSubmittingExcel}
+                    disabled={isSubmittingExcel || excelValidationErrors.length > 0}
                     className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     {isSubmittingExcel ? 'Processing...' : 'Process Excel File'}
                   </button>
+                  
+                  {excelValidationErrors.length > 0 && (
+                    <p className="text-xs text-red-600 mt-2">
+                      Please fix the file validation errors before processing.
+                    </p>
+                  )}
                 </div>
               )}
               

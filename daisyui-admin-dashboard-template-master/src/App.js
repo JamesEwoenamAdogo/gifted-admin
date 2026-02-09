@@ -29,7 +29,7 @@ function App() {
     themeChange(false)
   }, [])
 
-  axios.defaults.baseURL = "https://olympiadedu-backend-5xho.onrender.com/api/v1"
+  axios.defaults.baseURL = "https://olympiadedu-backend-a7fm.onrender.com/api/v1"
 
   return (
     <>

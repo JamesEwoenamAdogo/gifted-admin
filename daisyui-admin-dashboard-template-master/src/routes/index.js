@@ -1,6 +1,7 @@
 // All components mapping with path for internal routes
 
 import { lazy } from 'react'
+import ExamMode from '../pages/protected/ExamMode'
 // import InterestPage from '../pages/protected/InterestPage'
 
 const Dashboard = lazy(() => import('../pages/protected/Dashboard'))
@@ -50,6 +51,8 @@ const AddFlashCard = lazy(() => import('../pages/protected/AddFlashCard'))
 const AddTimedChallenge = lazy(() => import('../pages/protected/AddTimedChallenge'))
 const AllFlashCards = lazy(() => import('../pages/protected/AllFlashCards'))
 const AllTimedChallenge = lazy(() => import('../pages/protected/AllTimedChallenge'))
+const ExamsMode = lazy(() => import('../pages/protected/ExamMode'))
+const Pathways = lazy(() => import('../pages/protected/PathwayManager'))
 
 
 
@@ -185,6 +188,14 @@ const routes = [
   {
     path: '/exam-details',
     component: ExamsDetails,
+  },
+  {
+    path: '/exam-mode',
+    component: ExamsMode,
+  },
+  {
+    path:"/pathway-manager",
+    component:Pathways
   },
   {
     path:"/fetch-scores",

@@ -66,6 +66,18 @@ const routes = [
     path:"/app/timed-challenge",
     name:"Timed Challenge"
   },
+  {
+    path:"/app/timed-challenge",
+    name:"Timed Challenge"
+  },
+  {
+    path:"/app/pathway-manager",
+    name:"Pathway Manager"
+  },
+  {
+    path:"/app/exam-mode",
+    name:"Exams Mode"
+  },
  
   {
     path: '/app/addOns', // url
