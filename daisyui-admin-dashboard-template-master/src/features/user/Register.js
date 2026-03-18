@@ -20,6 +20,8 @@ function Register(){
         e.preventDefault()
         setErrorMessage("")
 
+        console.log("Hello")
+
         if(registerObj.name.trim() === "")return setErrorMessage("Name is required! (use any value)")
         if(registerObj.emailId.trim() === "")return setErrorMessage("Email Id is required! (use any value)")
         if(registerObj.password.trim() === "")return setErrorMessage("Password is required! (use any value)")
